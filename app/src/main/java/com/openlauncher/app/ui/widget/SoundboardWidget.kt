@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.openlauncher.app.data.SoundPadConfig
+import androidx.compose.ui.res.stringResource
+import com.openlauncher.app.R
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -183,7 +185,7 @@ private fun PadAssignDialog(
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Text(
-                "ASSIGN PAD SOUND",
+                stringResource(R.string.assign_sound),
                 color = contentColor,
                 fontSize = 10.sp,
                 fontFamily = FontFamily.Monospace,
@@ -193,7 +195,7 @@ private fun PadAssignDialog(
 
             // Label field
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("PAD LABEL", color = dimColor, fontSize = 7.sp, fontFamily = FontFamily.Monospace, letterSpacing = 1.5.sp)
+                Text(stringResource(R.string.pad_label), color = dimColor, fontSize = 7.sp, fontFamily = FontFamily.Monospace, letterSpacing = 1.5.sp)
                 BasicTextField(
                     value = labelText,
                     onValueChange = { if (it.length <= 12) labelText = it },
@@ -213,7 +215,7 @@ private fun PadAssignDialog(
 
             // Preloaded Audio Selector (replaces old raw waveform synth generation)
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("PRELOADED AUDIO", color = dimColor, fontSize = 7.sp, fontFamily = FontFamily.Monospace, letterSpacing = 1.5.sp)
+                Text(stringResource(R.string.preloaded_audio), color = dimColor, fontSize = 7.sp, fontFamily = FontFamily.Monospace, letterSpacing = 1.5.sp)
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -254,7 +256,7 @@ private fun PadAssignDialog(
 
             // Custom audio file picker
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("CUSTOM AUDIO FILE", color = dimColor, fontSize = 7.sp, fontFamily = FontFamily.Monospace, letterSpacing = 1.5.sp)
+                Text(stringResource(R.string.custom_audio_file), color = dimColor, fontSize = 7.sp, fontFamily = FontFamily.Monospace, letterSpacing = 1.5.sp)
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -270,7 +272,7 @@ private fun PadAssignDialog(
                         Icon(Icons.Default.AudioFile, null, tint = accent, modifier = Modifier.size(12.dp))
                         Spacer(Modifier.width(4.dp))
                         Text(
-                            if (audioUri.isNotEmpty()) "CUSTOM FILE ASSIGNED" else "PICK AUDIO FILE",
+                            if (audioUri.isNotEmpty()) stringResource(R.string.custom_file_assigned) else stringResource(R.string.pick_audio_file),
                             color = accent,
                             fontSize = 7.sp,
                             fontFamily = FontFamily.Monospace,
@@ -313,7 +315,7 @@ private fun PadAssignDialog(
                     border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF884444)),
                     contentPadding = PaddingValues(0.dp)
                 ) {
-                    Text("CLEAR SOUND", color = Color(0xFF884444), fontSize = 7.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.clear_sound), color = Color(0xFF884444), fontSize = 7.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -330,7 +332,7 @@ private fun PadAssignDialog(
                     border = androidx.compose.foundation.BorderStroke(1.dp, fieldBorder),
                     contentPadding = PaddingValues(0.dp)
                 ) {
-                    Text("CANCEL", color = dimColor, fontSize = 7.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.cancel), color = dimColor, fontSize = 7.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 }
                 Button(
                     onClick = {
@@ -345,7 +347,7 @@ private fun PadAssignDialog(
                     colors = ButtonDefaults.buttonColors(containerColor = accent),
                     contentPadding = PaddingValues(0.dp)
                 ) {
-                    Text("SAVE SOUND", color = if (isDayMode) Color.White else Color.Black, fontSize = 7.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.save_sound), color = if (isDayMode) Color.White else Color.Black, fontSize = 7.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 }
             }
         }

@@ -29,12 +29,14 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
 import androidx.core.graphics.drawable.toBitmap
+import com.openlauncher.app.R
 import com.openlauncher.app.data.AppSettings
 import com.openlauncher.app.data.DefaultShortcutIcon
 import com.openlauncher.app.data.ShortcutConfig
@@ -133,7 +135,7 @@ fun Sidebar(
     val navButtons: @Composable () -> Unit = {
         NavButton(
             icon         = Icons.Default.Apps,
-            label        = "Apps",
+            label        = stringResource(R.string.nav_apps),
             isActive     = currentDest == NavDestination.APP_LIBRARY,
             accent       = accent,
             iconInactive = iconInactive,
@@ -142,7 +144,7 @@ fun Sidebar(
         )
         NavButton(
             icon         = Icons.Default.Settings,
-            label        = "Settings",
+            label        = stringResource(R.string.nav_settings),
             isActive     = currentDest == NavDestination.SETTINGS,
             accent       = accent,
             iconInactive = iconInactive,
@@ -151,7 +153,7 @@ fun Sidebar(
         )
         NavButton(
             icon         = Icons.Default.Home,
-            label        = "Home",
+            label        = stringResource(R.string.nav_home),
             isActive     = currentDest == NavDestination.HOME,
             accent       = accent,
             iconInactive = iconInactive,
@@ -189,13 +191,13 @@ fun Sidebar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (!settings.bottomBarShortcutsRight) {
-                    NavButton(Icons.Default.Home,     "Home",     currentDest == NavDestination.HOME,        accent, iconInactive, true) { onNavigate(NavDestination.HOME) }
-                    NavButton(Icons.Default.Settings, "Settings", currentDest == NavDestination.SETTINGS,    accent, iconInactive, true) { onNavigate(NavDestination.SETTINGS) }
-                    NavButton(Icons.Default.Apps,     "Apps",     currentDest == NavDestination.APP_LIBRARY, accent, iconInactive, true) { onNavigate(NavDestination.APP_LIBRARY) }
+                    NavButton(Icons.Default.Home,     stringResource(R.string.nav_home),     currentDest == NavDestination.HOME,        accent, iconInactive, true) { onNavigate(NavDestination.HOME) }
+                    NavButton(Icons.Default.Settings, stringResource(R.string.nav_settings), currentDest == NavDestination.SETTINGS,    accent, iconInactive, true) { onNavigate(NavDestination.SETTINGS) }
+                    NavButton(Icons.Default.Apps,     stringResource(R.string.nav_apps),     currentDest == NavDestination.APP_LIBRARY, accent, iconInactive, true) { onNavigate(NavDestination.APP_LIBRARY) }
                 } else {
-                    NavButton(Icons.Default.Apps,     "Apps",     currentDest == NavDestination.APP_LIBRARY, accent, iconInactive, true) { onNavigate(NavDestination.APP_LIBRARY) }
-                    NavButton(Icons.Default.Settings, "Settings", currentDest == NavDestination.SETTINGS,    accent, iconInactive, true) { onNavigate(NavDestination.SETTINGS) }
-                    NavButton(Icons.Default.Home,     "Home",     currentDest == NavDestination.HOME,        accent, iconInactive, true) { onNavigate(NavDestination.HOME) }
+                    NavButton(Icons.Default.Apps,     stringResource(R.string.nav_apps),     currentDest == NavDestination.APP_LIBRARY, accent, iconInactive, true) { onNavigate(NavDestination.APP_LIBRARY) }
+                    NavButton(Icons.Default.Settings, stringResource(R.string.nav_settings), currentDest == NavDestination.SETTINGS,    accent, iconInactive, true) { onNavigate(NavDestination.SETTINGS) }
+                    NavButton(Icons.Default.Home,     stringResource(R.string.nav_home),     currentDest == NavDestination.HOME,        accent, iconInactive, true) { onNavigate(NavDestination.HOME) }
                 }
             }
         }
@@ -365,7 +367,7 @@ private fun ShortcutSlot(
             else -> {
                 Icon(
                     imageVector        = Icons.Default.Add,
-                    contentDescription = "Add shortcut",
+                    contentDescription = stringResource(R.string.desc_add_shortcut),
                     tint               = if (LocalDayMode.current) Color(0xFFBBBBBB) else Color(0xFF252525),
                     modifier           = Modifier.size(ICON_SIZE)
                 )
@@ -391,11 +393,11 @@ private fun ShortcutActionDialog(
                 .padding(vertical = 4.dp)
                 .width(180.dp)
         ) {
-            ActionRow("CHANGE APP",     Icons.Default.SwapHoriz, accent, onChangeApp)
+            ActionRow(stringResource(R.string.shortcut_change_app),     Icons.Default.SwapHoriz, accent, onChangeApp)
             HorizontalDivider(color = Color(0xFF1A1A1A))
-            ActionRow("CUSTOMIZE ICON", Icons.Default.Palette,   accent, onCustomizeIcon)
+            ActionRow(stringResource(R.string.shortcut_change_icon),     Icons.Default.Palette,   accent, onCustomizeIcon)
             HorizontalDivider(color = Color(0xFF1A1A1A))
-            ActionRow("REMOVE",         Icons.Default.Delete,     Color(0xFF993333), onRemove)
+            ActionRow(stringResource(R.string.shortcut_remove),         Icons.Default.Delete,     Color(0xFF993333), onRemove)
         }
     }
 }
@@ -434,7 +436,7 @@ private fun IconPickerDialog(
                 .padding(12.dp)
         ) {
             Text(
-                "CHOOSE ICON",
+                stringResource(R.string.shortcut_select_icon),
                 color         = Color(0xFF888888),
                 fontSize      = 9.sp,
                 letterSpacing = 2.sp,
@@ -454,7 +456,7 @@ private fun IconPickerDialog(
                 ) {
                     Icon(Icons.Default.Apps, null, tint = if (currentOverride == null) accent else Color(0xFF666666), modifier = Modifier.size(18.dp))
                     Text(
-                        "NATIVE APP ICON",
+                        stringResource(R.string.shortcut_native_icon),
                         color         = if (currentOverride == null) accent else Color(0xFF888888),
                         fontSize      = 9.sp,
                         letterSpacing = 1.sp

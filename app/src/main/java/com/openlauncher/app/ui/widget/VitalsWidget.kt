@@ -23,6 +23,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
+import com.openlauncher.app.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
@@ -179,7 +181,7 @@ fun VitalsWidget(
             ) {
                 BarGauge(
                     value = cpuUsage,
-                    label = "CPU",
+                    label = stringResource(R.string.vitals_cpu),
                     displayValue = "%.0f%%".format(cpuUsage),
                     activeColor = cpuColor,
                     isDayMode = isDayMode,
@@ -187,7 +189,7 @@ fun VitalsWidget(
                 )
                 BarGauge(
                     value = ramUsedPercent,
-                    label = "RAM",
+                    label = stringResource(R.string.vitals_ram),
                     displayValue = ramDisplayGb,
                     activeColor = ramColor,
                     isDayMode = isDayMode,
@@ -195,7 +197,7 @@ fun VitalsWidget(
                 )
                 BarGauge(
                     value = temperature,
-                    label = "TEMP",
+                    label = stringResource(R.string.vitals_temp),
                     displayValue = "%.0f°".format(temperature),
                     activeColor = tempColor,
                     isDayMode = isDayMode,
@@ -210,7 +212,7 @@ fun VitalsWidget(
             ) {
                 DialGauge(
                     value = cpuUsage,
-                    label = "CPU",
+                    label = stringResource(R.string.vitals_cpu),
                     displayValue = "%.0f%%".format(cpuUsage),
                     activeColor = cpuColor,
                     isDayMode = isDayMode,
@@ -219,7 +221,7 @@ fun VitalsWidget(
 
                 DialGauge(
                     value = ramUsedPercent,
-                    label = "RAM",
+                    label = stringResource(R.string.vitals_ram),
                     displayValue = ramDisplayGb,
                     activeColor = ramColor,
                     isDayMode = isDayMode,
@@ -228,7 +230,7 @@ fun VitalsWidget(
 
                 DialGauge(
                     value = temperature,
-                    label = "TEMP",
+                    label = stringResource(R.string.vitals_temp),
                     displayValue = "%.0f°".format(temperature),
                     activeColor = tempColor,
                     isDayMode = isDayMode,

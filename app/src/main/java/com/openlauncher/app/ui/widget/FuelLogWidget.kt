@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.openlauncher.app.data.FuelEntry
+import androidx.compose.ui.res.stringResource
+import com.openlauncher.app.R
 
 private const val KM_PER_MILE = 1.609344
 
@@ -71,7 +73,7 @@ fun FuelLogWidget(
                 ) {
                     Icon(Icons.Default.LocalGasStation, null, tint = dimColor, modifier = Modifier.size(20.dp))
                     Spacer(Modifier.height(4.dp))
-                    Text("NO FILL-UPS LOGGED", color = dimColor, fontSize = 8.sp, letterSpacing = 1.sp, fontFamily = FontFamily.Monospace)
+                    Text(stringResource(R.string.no_logs), color = dimColor, fontSize = 8.sp, letterSpacing = 1.sp, fontFamily = FontFamily.Monospace)
                 }
             } else {
                 Row(
@@ -79,7 +81,7 @@ fun FuelLogWidget(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(verticalArrangement = Arrangement.SpaceBetween) {
-                        Text("EFFICIENCY", color = labelColor, fontSize = 6.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
+                        Text(stringResource(R.string.efficiency), color = labelColor, fontSize = 6.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
                         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                             Text(
                                 text = efficiency?.let { "%.1f".format(it) } ?: "--.-",
@@ -93,11 +95,11 @@ fun FuelLogWidget(
                         }
                     }
                     Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.SpaceBetween) {
-                        Text("LAST FILL-UP", color = labelColor, fontSize = 6.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
+                        Text(stringResource(R.string.last_fillup), color = labelColor, fontSize = 6.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
                         Column(horizontalAlignment = Alignment.End) {
                             Text("%.2f".format(last.cost), color = displayColor, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                             Text(
-                                text = costPerDist?.let { "%.3f/%s".format(it, if (isMetric) "km" else "mi") } ?: "-- / fill-up",
+                                text = costPerDist?.let { "%.3f/%s".format(it, if (isMetric) "km" else "mi") } ?: "-- / ${stringResource(R.string.fill_up)}",
                                 color = dimColor, fontSize = 7.sp, fontFamily = FontFamily.Monospace
                             )
                         }
@@ -122,7 +124,7 @@ fun FuelLogWidget(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         Icon(Icons.Default.Add, null, tint = accent, modifier = Modifier.size(12.dp))
-                        Text("LOG FILL-UP", color = accent, fontSize = 8.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
+                        Text(stringResource(R.string.log_fillup), color = accent, fontSize = 8.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
                     }
                 }
             }
@@ -173,13 +175,13 @@ private fun AddFuelEntryDialog(
                 .padding(20.dp)
                 .widthIn(min = 280.dp, max = 380.dp)
         ) {
-            Text("LOG FILL-UP", color = dialogText, fontSize = 11.sp, letterSpacing = 2.sp, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.log_fillup), color = dialogText, fontSize = 11.sp, letterSpacing = 2.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(16.dp))
 
             OutlinedTextField(
                 value = odometerText,
                 onValueChange = { odometerText = it },
-                label = { Text(if (isMetric) "ODOMETER (KM)" else "ODOMETER (MI)", fontSize = 10.sp) },
+                label = { Text(if (isMetric) "${stringResource(R.string.odometer)} (KM)" else "${stringResource(R.string.odometer)} (MI)", fontSize = 10.sp) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
@@ -188,7 +190,7 @@ private fun AddFuelEntryDialog(
             OutlinedTextField(
                 value = volumeText,
                 onValueChange = { volumeText = it },
-                label = { Text(if (isMetric) "VOLUME (LITERS)" else "VOLUME (GALLONS)", fontSize = 10.sp) },
+                label = { Text(if (isMetric) stringResource(R.string.volume_liters) else stringResource(R.string.volume_gallons), fontSize = 10.sp) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
@@ -197,7 +199,7 @@ private fun AddFuelEntryDialog(
             OutlinedTextField(
                 value = costText,
                 onValueChange = { costText = it },
-                label = { Text("TOTAL COST", fontSize = 10.sp) },
+                label = { Text(stringResource(R.string.total_cost), fontSize = 10.sp) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
@@ -206,13 +208,13 @@ private fun AddFuelEntryDialog(
             Spacer(Modifier.height(20.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 TextButton(onClick = onDismiss) {
-                    Text("CANCEL", color = cancelColor, fontSize = 11.sp, letterSpacing = 1.sp)
+                    Text(stringResource(R.string.cancel), color = cancelColor, fontSize = 11.sp, letterSpacing = 1.sp)
                 }
                 TextButton(
                     enabled = valid,
                     onClick = { if (valid) onConfirm(odometer!!, volume!!, cost!!) }
                 ) {
-                    Text("SAVE", color = if (valid) accent else cancelColor, fontSize = 11.sp, letterSpacing = 1.sp)
+                    Text(stringResource(R.string.save), color = if (valid) accent else cancelColor, fontSize = 11.sp, letterSpacing = 1.sp)
                 }
             }
         }

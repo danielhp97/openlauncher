@@ -7,6 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -15,6 +16,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
+import com.openlauncher.app.R
 import com.openlauncher.app.util.LocationData
 import kotlin.math.abs
 
@@ -80,34 +84,37 @@ fun TelemetryWidget(
                     Text(
                         text     = "N",
                         color    = cardinalMain,
-                        fontSize = 11.sp,
+                        fontSize = 21.sp,
                         modifier = Modifier
                             .align(Alignment.TopCenter)
-                            .padding(top = (capturedMaxHeight / 2 - radius - 6.dp).coerceAtLeast(0.dp))
+                            .padding(top = (capturedMaxHeight / 2 - radius - 13.dp).coerceAtLeast(0.dp))
                     )
                     Text(
                         text     = "S",
                         color    = cardinalMain,
-                        fontSize = 11.sp,
+                        fontSize = 21.sp,
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
-                            .padding(bottom = (capturedMaxHeight / 2 - radius - 6.dp).coerceAtLeast(0.dp))
+                            .padding(bottom = (capturedMaxHeight / 2 - radius - 13.dp).coerceAtLeast(0.dp))
+                            .rotate(180f)
                     )
                     Text(
                         text     = "E",
                         color    = cardinalSub,
-                        fontSize = 9.sp,
+                        fontSize = 19.sp,
                         modifier = Modifier
                             .align(Alignment.CenterEnd)
                             .padding(end = (capturedMaxWidth / 2 - radius - 6.dp).coerceAtLeast(0.dp))
+                            .rotate(90f)
                     )
                     Text(
                         text     = "W",
                         color    = cardinalSub,
-                        fontSize = 9.sp,
+                        fontSize = 19.sp,
                         modifier = Modifier
                             .align(Alignment.CenterStart)
                             .padding(start = (capturedMaxWidth / 2 - radius - 6.dp).coerceAtLeast(0.dp))
+                            .rotate(270f)
                     )
                 }
             }
@@ -133,12 +140,12 @@ fun TelemetryWidget(
                 )
 
                 // Hollow pivot circle
-                drawCircle(
-                    color  = Color(0xFF777777),
-                    radius = 3.dp.toPx(),
-                    center = Offset(cx, cy),
-                    style  = Stroke(width = 1.5.dp.toPx())
-                )
+//                drawCircle(
+//                    color  = Color(0xFF777777),
+//                    radius = 3.dp.toPx(),
+//                    center = Offset(cx, cy),
+//                    style  = Stroke(width = 1.5.dp.toPx())
+//                )
             }
         }
 
@@ -152,7 +159,7 @@ fun TelemetryWidget(
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
-                    text          = "LATITUDE",
+                    text          = stringResource(R.string.lat_label),
                     style         = MaterialTheme.typography.labelSmall,
                     color         = subColor,
                     letterSpacing = 1.sp,
@@ -163,25 +170,39 @@ fun TelemetryWidget(
                     color    = contentColor,
                     fontSize = 11.sp
                 )
-            }
-            Column(
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-                horizontalAlignment = Alignment.End
-            ) {
                 Text(
-                    text          = "LONGITUDE",
+                    text          = stringResource(R.string.lon_label),
                     style         = MaterialTheme.typography.labelSmall,
                     color         = subColor,
                     letterSpacing = 1.sp,
                     fontSize      = 7.sp,
-                    textAlign     = TextAlign.End
                 )
                 Text(
                     text      = if (location != null) formatLon(location.longitude) else "—",
                     color     = contentColor,
                     fontSize  = 11.sp,
-                    textAlign = TextAlign.End
                 )
+            }
+            Column(
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+                horizontalAlignment = Alignment.End
+            ) {
+                if (location != null && location.satellitesVisible > 0) {
+                    Text(
+                        text          = stringResource(R.string.satellites),
+                        style         = MaterialTheme.typography.labelSmall,
+                        color         = subColor,
+                        letterSpacing = 1.sp,
+                        fontSize      = 7.sp,
+                        textAlign     = TextAlign.End
+                    )
+                    Text(
+                        text      = "${location.satellitesUsed}/${location.satellitesVisible}",
+                        color     = contentColor,
+                        fontSize  = 11.sp,
+                        textAlign = TextAlign.End
+                    )
+                }
             }
         }
     }

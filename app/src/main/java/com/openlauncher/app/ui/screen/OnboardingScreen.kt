@@ -225,12 +225,18 @@ fun OnboardingScreen(
                             })
                             2 -> MediaStep(accent, mediaGranted, onGrant = {
                                 runCatching {
-                                    context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                                    context.startActivity(
+                                        Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    )
                                 }
                             })
                             3 -> FinalStep(accent, onSetDefault = {
                                 runCatching {
-                                    context.startActivity(Intent(Settings.ACTION_HOME_SETTINGS))
+                                    context.startActivity(
+                                        Intent(Settings.ACTION_HOME_SETTINGS)
+                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    )
                                 }
                             })
                         }

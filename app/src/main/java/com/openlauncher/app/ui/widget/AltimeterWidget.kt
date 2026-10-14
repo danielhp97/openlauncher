@@ -16,10 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.openlauncher.app.R
 import com.openlauncher.app.util.LocationData
 import kotlin.math.*
 
@@ -114,7 +116,7 @@ fun AltimeterWidget(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "ALTITUDE",
+                text = stringResource(R.string.alt_title),
                 color = labelColor,
                 fontSize = 7.sp,
                 letterSpacing = 1.sp,
@@ -153,11 +155,11 @@ fun AltimeterWidget(
             verticalAlignment     = Alignment.Bottom
         ) {
             Column {
-                Text("ROLL",  color = labelColor, fontSize = 7.sp, letterSpacing = 1.sp)
+                Text(stringResource(R.string.roll_label),  color = labelColor, fontSize = 7.sp, letterSpacing = 1.sp)
                 Text("%.1f°".format(displayRoll),  color = accent, fontSize = 12.sp, fontWeight = FontWeight.Bold)
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text("PITCH", color = labelColor, fontSize = 7.sp, letterSpacing = 1.sp, textAlign = TextAlign.End)
+                Text(stringResource(R.string.pitch_label), color = labelColor, fontSize = 7.sp, letterSpacing = 1.sp, textAlign = TextAlign.End)
                 Text("%.1f°".format(displayPitch), color = accent, fontSize = 12.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.End)
             }
         }

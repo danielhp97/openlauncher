@@ -21,15 +21,16 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalTextInputService
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
+import com.openlauncher.app.R
 import com.openlauncher.app.model.AppInfo
 import com.openlauncher.app.ui.theme.LocalDayMode
-import com.openlauncher.app.ui.theme.onAccentColor
 
 private enum class AppFilter { USER, SYSTEM, ALL }
 
@@ -86,8 +87,8 @@ fun AppLibraryScreen(
             Text(
                 text          = when {
                     isCarPlayPickerMode -> carPlayPickerLabel
-                    anyPickerMode       -> "CHOOSE APP"
-                    else                -> "APPS"
+                    anyPickerMode       -> stringResource(R.string.choose_app)
+                    else                -> stringResource(R.string.apps_title)
                 },
                 style         = MaterialTheme.typography.titleLarge,
                 color         = if (anyPickerMode) accent else headerColor,
@@ -103,9 +104,9 @@ fun AppLibraryScreen(
                             label    = {
                                 Text(
                                     when (filter) {
-                                        AppFilter.USER   -> "Installed"
-                                        AppFilter.SYSTEM -> "System"
-                                        AppFilter.ALL    -> "All"
+                                        AppFilter.USER   -> stringResource(R.string.filter_installed)
+                                        AppFilter.SYSTEM -> stringResource(R.string.filter_system)
+                                        AppFilter.ALL    -> stringResource(R.string.filter_all)
                                     },
                                     fontSize = 9.sp,
                                     letterSpacing = 0.5.sp
@@ -113,7 +114,7 @@ fun AppLibraryScreen(
                             },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = accent,
-                                selectedLabelColor     = onAccentColor(accent),
+                                selectedLabelColor     = Color.Black,
                                 labelColor             = placeholderC
                             )
                         )
@@ -144,7 +145,7 @@ fun AppLibraryScreen(
                             .onFocusChanged { searchFocused = it.isFocused },
                         decorationBox = { inner ->
                             Box {
-                                if (query.isEmpty()) Text("Search…", color = placeholderC, fontSize = 13.sp)
+                                if (query.isEmpty()) Text(stringResource(R.string.search_placeholder), color = placeholderC, fontSize = 13.sp)
                                 inner()
                             }
                         }
@@ -164,7 +165,7 @@ fun AppLibraryScreen(
 
         if (filtered.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("No apps found", color = emptyColor, letterSpacing = 1.sp, fontSize = 12.sp)
+                Text(stringResource(R.string.no_apps_found), color = emptyColor, letterSpacing = 1.sp, fontSize = 12.sp)
             }
             return@Column
         }

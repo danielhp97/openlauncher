@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.openlauncher.app.util.LocationData
 import kotlinx.coroutines.delay
+import androidx.compose.ui.res.stringResource
+import com.openlauncher.app.R
 
 @Composable
 fun TripTrackerWidget(
@@ -217,7 +219,7 @@ fun TripTrackerWidget(
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "DISTANCE // DIST",
+                        text = stringResource(R.string.distance_dist),
                         color = labelColor,
                         fontSize = 6.5.sp,
                         fontFamily = FontFamily.Monospace,
@@ -257,14 +259,14 @@ fun TripTrackerWidget(
                     // Hired/Time-Off Indicators
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(
-                            text = "[RUNNING]",
+                            text = "[${stringResource(R.string.running)}]",
                             color = if (isRunning) activeAccent else dimDisplayColor,
                             fontSize = 6.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Monospace
                         )
                         Text(
-                            text = "[STOPPED]",
+                            text = "[${stringResource(R.string.stopped)}]",
                             color = if (!isRunning && (driveTimeSeconds > 0 || idleTimeSeconds > 0)) teRed else dimDisplayColor,
                             fontSize = 6.sp,
                             fontWeight = FontWeight.Bold,
@@ -282,14 +284,14 @@ fun TripTrackerWidget(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("DRIVE [TIME]", color = labelColor, fontSize = 6.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        Text("${stringResource(R.string.drive)} [${stringResource(R.string.time)}]", color = labelColor, fontSize = 6.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                         Box {
                             Text("88:88:88", color = dimDisplayColor, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
                             Text(formatTime(driveTimeSeconds), color = displayColor, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
                         }
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("IDLE [TIME]", color = labelColor, fontSize = 6.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        Text("${stringResource(R.string.idle)} [${stringResource(R.string.time)}]", color = labelColor, fontSize = 6.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                         Box {
                             Text("88:88:88", color = dimDisplayColor, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
                             Text(formatTime(idleTimeSeconds), color = displayColor, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
@@ -305,7 +307,7 @@ fun TripTrackerWidget(
                 ) {
                     Column(horizontalAlignment = Alignment.End) {
                         Text(
-                            text = "AVG SPEED // SPD",
+                            text = stringResource(R.string.avg_speed_spd),
                             color = labelColor,
                             fontSize = 6.5.sp,
                             fontFamily = FontFamily.Monospace,
@@ -347,7 +349,7 @@ fun TripTrackerWidget(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Text("SYS STAT", color = labelColor, fontSize = 6.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.sys_stat), color = labelColor, fontSize = 6.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                         Text(
                             text = if (isRunning) "A" else "I",
                             color = if (isRunning) activeAccent else displayColor,
@@ -364,7 +366,7 @@ fun TripTrackerWidget(
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = if (isMetric) "ACCEL TEST // 0-100" else "ACCEL TEST // 0-60",
+                        text = if (isMetric) "${stringResource(R.string.accel_test)} // 0-100" else "${stringResource(R.string.accel_test)} // 0-60",
                         color = labelColor,
                         fontSize = 6.5.sp,
                         fontFamily = FontFamily.Monospace,
@@ -393,7 +395,7 @@ fun TripTrackerWidget(
                             )
                         }
                         Text(
-                            text = "SEC",
+                            text = stringResource(R.string.sec),
                             color = displayColor,
                             fontSize = 9.sp,
                             fontFamily = FontFamily.Monospace,
@@ -405,21 +407,21 @@ fun TripTrackerWidget(
                     // Acceleration Status indicators
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(
-                            text = "[READY]",
+                            text = "[${stringResource(R.string.ready)}]",
                             color = if (accelState == "READY") activeAccent else dimDisplayColor,
                             fontSize = 6.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Monospace
                         )
                         Text(
-                            text = "[RUNNING]",
+                            text = "[${stringResource(R.string.running)}]",
                             color = if (accelState == "RUNNING" || isSimulating) Color(0xFFE6A23C) else dimDisplayColor,
                             fontSize = 6.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Monospace
                         )
                         Text(
-                            text = "[COMPLETE]",
+                            text = "[${stringResource(R.string.complete)}]",
                             color = if (accelState == "COMPLETE") teRed else dimDisplayColor,
                             fontSize = 6.sp,
                             fontWeight = FontWeight.Bold,
@@ -439,7 +441,7 @@ fun TripTrackerWidget(
                 ) {
                     Column(horizontalAlignment = Alignment.End) {
                         Text(
-                            text = "SPEED // TARGET %d".format(targetSpeed.toInt()),
+                            text = "${stringResource(R.string.speed_target)} %d".format(targetSpeed.toInt()),
                             color = labelColor,
                             fontSize = 6.5.sp,
                             fontFamily = FontFamily.Monospace,
@@ -479,7 +481,7 @@ fun TripTrackerWidget(
                     
                     Column(horizontalAlignment = Alignment.End) {
                         Text(
-                            text = if (accelState == "READY" && !isSimulating) "TAP SPEED TO TEST" else "BEST RECORD",
+                            text = if (accelState == "READY" && !isSimulating) stringResource(R.string.tap_test_speed) else stringResource(R.string.best_record),
                             color = if (accelState == "READY" && !isSimulating) activeAccent.copy(alpha = 0.7f) else labelColor,
                             fontSize = 5.5.sp,
                             fontFamily = FontFamily.Monospace,
@@ -508,7 +510,7 @@ fun TripTrackerWidget(
             // Button 1: OPR / RUN styled as a flat dynamic circular cap
             val oprActive = if (activeMode == "0-100") (accelState == "RUNNING" || isSimulating) else isRunning
             TeTactileButton(
-                label = "OPR",
+                label = stringResource(R.string.opr),
                 keyColor = activeAccent,
                 active = oprActive,
                 onClick = {
@@ -531,7 +533,7 @@ fun TripTrackerWidget(
                 !isRunning && (driveTimeSeconds > 0 || idleTimeSeconds > 0)
             }
             TeTactileButton(
-                label = "RST",
+                label = stringResource(R.string.rst),
                 keyColor = teRed,
                 active = false,
                 enabled = canReset,
@@ -555,7 +557,7 @@ fun TripTrackerWidget(
 
             // Button 3: EXTRAS (Toggles between TRIP info and 0-100 Accel Run)
             TeTactileButton(
-                label = "EXT",
+                label = stringResource(R.string.ext),
                 keyColor = activeAccent,
                 active = activeMode == "0-100",
                 enabled = true,
@@ -567,7 +569,7 @@ fun TripTrackerWidget(
 
             // Button 4: SET
             TeTactileButton(
-                label = "SET",
+                label = stringResource(R.string.set),
                 keyColor = teGrey,
                 active = false,
                 enabled = false,

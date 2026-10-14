@@ -28,9 +28,12 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.openlauncher.app.R
 import com.openlauncher.app.data.AppFont
+import com.openlauncher.app.data.AppLanguage
 import com.openlauncher.app.data.AppSettings
 import com.openlauncher.app.data.DASHBOARD_THEMES
 import com.openlauncher.app.data.DayNightMode
@@ -96,7 +99,7 @@ fun SettingsScreen(
     ) {
         // ── Title ────────────────────────────────────────────────────────────
         Text(
-            text          = "SETTINGS",
+            text          = stringResource(R.string.settings_title),
             style         = MaterialTheme.typography.titleLarge,
             color         = if (isDayMode) Color(0xFF111111) else accent,
             letterSpacing = 3.sp,
@@ -106,7 +109,7 @@ fun SettingsScreen(
         Spacer(Modifier.height(4.dp))
 
         // ── Permissions ──────────────────────────────────────────────────────
-        SettingsSection("Permissions") {
+        SettingsSection(stringResource(R.string.settings_section_permissions)) {
             val isMediaConnected by com.openlauncher.app.service.MediaListenerService.isConnected.collectAsState()
 
             // Bumped on ON_RESUME so statuses refresh when the user returns from
@@ -147,9 +150,9 @@ fun SettingsScreen(
             ) { permissionRefresh++ }
 
             SettingsButton(
-                label    = "Set as Default Launcher",
-                sublabel = if (isDefaultLauncher) "Active — Open Launcher is the home app"
-                           else "Required so the head unit boots into Open Launcher",
+                label    = stringResource(R.string.perm_default_launcher),
+                sublabel = if (isDefaultLauncher) stringResource(R.string.perm_default_launcher_active)
+                           else stringResource(R.string.perm_default_launcher_sub),
                 icon     = Icons.Default.Home,
                 accent   = if (isDefaultLauncher) accent else Color(0xFF993333),
                 onClick  = {
@@ -186,8 +189,8 @@ fun SettingsScreen(
             )
             SettingsDivider()
             SettingsButton(
-                label    = "Notification Access",
-                sublabel = if (isMediaConnected) "Granted — media controls active" else "Required for Now Playing widget",
+                label    = stringResource(R.string.perm_notification_access),
+                sublabel = if (isMediaConnected) stringResource(R.string.perm_notification_granted) else stringResource(R.string.perm_notification_sub),
                 icon     = if (isMediaConnected) Icons.Default.NotificationsActive else Icons.Default.NotificationsOff,
                 accent   = if (isMediaConnected) accent else Color(0xFF993333),
                 onClick  = {
@@ -199,8 +202,8 @@ fun SettingsScreen(
             )
             SettingsDivider()
             SettingsButton(
-                label    = "Draw Over Other Apps",
-                sublabel = if (canDrawOverlays) "Granted — PIP overlay enabled" else "Required for PIP floating window",
+                label    = stringResource(R.string.perm_draw_overlays),
+                sublabel = if (canDrawOverlays) stringResource(R.string.perm_draw_overlays_granted) else stringResource(R.string.perm_draw_overlays_sub),
                 icon     = if (canDrawOverlays) Icons.Default.Layers else Icons.Default.LayersClear,
                 accent   = if (canDrawOverlays) accent else Color(0xFF993333),
                 onClick  = {
@@ -218,8 +221,8 @@ fun SettingsScreen(
             )
             SettingsDivider()
             SettingsButton(
-                label    = "Location Access",
-                sublabel = if (hasLocation) "Granted — GPS, compass & weather active" else "Required for compass, speed & weather",
+                label    = stringResource(R.string.perm_location_access),
+                sublabel = if (hasLocation) stringResource(R.string.perm_location_granted) else stringResource(R.string.perm_location_sub),
                 icon     = if (hasLocation) Icons.Default.LocationOn else Icons.Default.LocationOff,
                 accent   = if (hasLocation) accent else Color(0xFF993333),
                 onClick  = {
@@ -245,10 +248,10 @@ fun SettingsScreen(
         }
 
         // ── Vehicle Name ─────────────────────────────────────────────────────
-        SettingsSection("Vehicle") {
+        SettingsSection(stringResource(R.string.settings_section_vehicle)) {
             var nameInput by remember(settings.vehicleName) { mutableStateOf(settings.vehicleName) }
             SettingsRow(
-                label    = "Vehicle Name",
+                label    = stringResource(R.string.vehicle_name),
                 sublabel = "",
                 icon     = Icons.Default.DirectionsCar
             ) {
@@ -264,7 +267,7 @@ fun SettingsScreen(
                     )
                     if (nameInput != settings.vehicleName) {
                         IconButton(onClick = { onUpdate { copy(vehicleName = nameInput) } }, modifier = Modifier.size(32.dp)) {
-                            Icon(Icons.Default.Check, "Save", tint = accent, modifier = Modifier.size(16.dp))
+                            Icon(Icons.Default.Check, stringResource(R.string.save), tint = accent, modifier = Modifier.size(16.dp))
                         }
                     }
                 }
@@ -273,11 +276,11 @@ fun SettingsScreen(
             SettingsDivider()
 
             SettingsRow(
-                label    = "Sidebar Position",
+                label    = stringResource(R.string.sidebar_position),
                 sublabel = when (settings.sidebarPosition) {
-                    SidebarPosition.LEFT   -> "Left side"
-                    SidebarPosition.RIGHT  -> "Right side"
-                    SidebarPosition.BOTTOM -> "Bottom"
+                    SidebarPosition.LEFT   -> stringResource(R.string.sidebar_left)
+                    SidebarPosition.RIGHT  -> stringResource(R.string.sidebar_right)
+                    SidebarPosition.BOTTOM -> stringResource(R.string.sidebar_bottom)
                 },
                 icon     = Icons.Default.SwapHoriz
             ) {
@@ -289,9 +292,9 @@ fun SettingsScreen(
                             label    = {
                                 Text(
                                     when (pos) {
-                                        SidebarPosition.LEFT   -> "Left"
-                                        SidebarPosition.RIGHT  -> "Right"
-                                        SidebarPosition.BOTTOM -> "Bottom"
+                                        SidebarPosition.LEFT   -> stringResource(R.string.pos_left)
+                                        SidebarPosition.RIGHT  -> stringResource(R.string.pos_right)
+                                        SidebarPosition.BOTTOM -> stringResource(R.string.pos_bottom)
                                     },
                                     fontSize = 9.sp,
                                     letterSpacing = 0.5.sp
@@ -299,7 +302,7 @@ fun SettingsScreen(
                             },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = accent,
-                                selectedLabelColor     = onAccentColor(accent)
+                                selectedLabelColor     = Color.Black
                             )
                         )
                     }
@@ -309,8 +312,8 @@ fun SettingsScreen(
             if (settings.sidebarPosition == SidebarPosition.BOTTOM) {
                 SettingsDivider()
                 SettingsRow(
-                    label    = "Shortcuts Side",
-                    sublabel = if (settings.bottomBarShortcutsRight) "Right — nav buttons on left" else "Left — nav buttons on right",
+                    label    = stringResource(R.string.shortcuts_side),
+                    sublabel = if (settings.bottomBarShortcutsRight) stringResource(R.string.shortcuts_right_sub) else stringResource(R.string.shortcuts_left_sub),
                     icon     = Icons.Default.FormatAlignRight
                 ) {
                     Switch(
@@ -323,25 +326,29 @@ fun SettingsScreen(
 
             SettingsDivider()
 
-            SettingsRow(label = "Unit System", sublabel = if (settings.unitSystem == UnitSystem.METRIC) "Metric (°C, km)" else "Imperial (°F, mi)", icon = Icons.Default.Straighten) {
+            SettingsRow(
+                label    = stringResource(R.string.unit_system),
+                sublabel = if (settings.unitSystem == UnitSystem.METRIC) stringResource(R.string.unit_metric_sub) else stringResource(R.string.unit_imperial_sub),
+                icon     = Icons.Default.Straighten
+            ) {
                 Row {
                     FilterChip(
                         selected = settings.unitSystem == UnitSystem.METRIC,
                         onClick  = { onUpdate { copy(unitSystem = UnitSystem.METRIC) } },
-                        label    = { Text("Metric", fontSize = 11.sp) },
+                        label    = { Text(stringResource(R.string.unit_metric), fontSize = 11.sp) },
                         colors   = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = accent,
-                            selectedLabelColor     = onAccentColor(accent)
+                            selectedLabelColor     = Color.Black
                         )
                     )
                     Spacer(Modifier.width(6.dp))
                     FilterChip(
                         selected = settings.unitSystem == UnitSystem.IMPERIAL,
                         onClick  = { onUpdate { copy(unitSystem = UnitSystem.IMPERIAL) } },
-                        label    = { Text("Imperial", fontSize = 11.sp) },
+                        label    = { Text(stringResource(R.string.unit_imperial), fontSize = 11.sp) },
                         colors   = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = accent,
-                            selectedLabelColor     = onAccentColor(accent)
+                            selectedLabelColor     = Color.Black
                         )
                     )
                 }
@@ -382,15 +389,15 @@ fun SettingsScreen(
         }
 
         // ── Sidebar Shortcuts ─────────────────────────────────────────────────
-        SettingsSection("Sidebar") {
+        SettingsSection(stringResource(R.string.settings_section_sidebar)) {
             settings.shortcuts.forEachIndexed { index, shortcut ->
                 if (index > 0) SettingsDivider()
                 SettingsRow(
-                    label    = "Slot ${index + 1}",
+                    label    = stringResource(R.string.sidebar_slot, index + 1),
                     sublabel = when {
                         shortcut.label.isNotEmpty()       -> shortcut.label
                         shortcut.packageName.isNotEmpty() -> shortcut.packageName
-                        else                              -> "Empty"
+                        else                              -> stringResource(R.string.sidebar_empty)
                     },
                     icon     = Icons.Default.Apps
                 ) {
@@ -412,8 +419,8 @@ fun SettingsScreen(
             SettingsDivider()
 
             SettingsButton(
-                label    = "Add Slot",
-                sublabel = "Append an empty shortcut to the sidebar",
+                label    = stringResource(R.string.sidebar_add_slot),
+                sublabel = stringResource(R.string.sidebar_add_slot_sub),
                 icon     = Icons.Default.Add,
                 accent   = accent,
                 onClick  = { onUpdate { copy(shortcuts = shortcuts + ShortcutConfig()) } }
@@ -421,7 +428,7 @@ fun SettingsScreen(
         }
 
         // ── Appearance ───────────────────────────────────────────────────────
-        SettingsSection("Appearance") {
+        SettingsSection(stringResource(R.string.settings_section_appearance)) {
             // Dashboard Theme — a preset owns both accent and surface tint together;
             // Accent Color / Background below only apply once this is set to Custom.
             DashboardThemeRow(settings = settings, onUpdate = onUpdate)
@@ -430,12 +437,12 @@ fun SettingsScreen(
 
             // Display Mode
             SettingsRow(
-                label    = "Display Mode",
+                label    = stringResource(R.string.display_mode),
                 sublabel = when (settings.dayNightMode) {
-                    DayNightMode.DARK   -> "Always dark"
-                    DayNightMode.LIGHT  -> "Always light"
-                    DayNightMode.AUTO   -> "Sunrise / sunset"
-                    DayNightMode.SYSTEM -> "Follows system theme"
+                    DayNightMode.DARK   -> stringResource(R.string.display_mode_dark)
+                    DayNightMode.LIGHT  -> stringResource(R.string.display_mode_light)
+                    DayNightMode.AUTO   -> stringResource(R.string.display_mode_auto)
+                    DayNightMode.SYSTEM -> stringResource(R.string.display_mode_system)
                 },
                 icon = when (settings.dayNightMode) {
                     DayNightMode.DARK   -> Icons.Default.NightlightRound
@@ -452,10 +459,10 @@ fun SettingsScreen(
                             label    = {
                                 Text(
                                     text      = when (mode) {
-                                        DayNightMode.DARK   -> "Dark"
-                                        DayNightMode.LIGHT  -> "Light"
-                                        DayNightMode.AUTO   -> "Sunset"
-                                        DayNightMode.SYSTEM -> "System"
+                                        DayNightMode.DARK   -> stringResource(R.string.mode_dark)
+                                        DayNightMode.LIGHT  -> stringResource(R.string.mode_light)
+                                        DayNightMode.AUTO   -> stringResource(R.string.mode_sunset)
+                                        DayNightMode.SYSTEM -> stringResource(R.string.mode_system)
                                     },
                                     fontSize  = 9.sp,
                                     letterSpacing = 0.5.sp
@@ -463,7 +470,7 @@ fun SettingsScreen(
                             },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = accent,
-                                selectedLabelColor     = onAccentColor(accent)
+                                selectedLabelColor     = Color.Black
                             )
                         )
                     }
@@ -474,14 +481,15 @@ fun SettingsScreen(
 
             // Accent color
             SettingsRow(
-                label    = "Accent Color",
-                sublabel = "UI highlight color",
+                label    = stringResource(R.string.accent_color),
+                sublabel = stringResource(R.string.accent_color_sub),
                 icon     = Icons.Default.Palette
             ) {
                 Box(
                     modifier = Modifier
                         .size(32.dp)
                         .clip(RoundedCornerShape(8.dp))
+                        .border(1.dp, Color(0xFF999999), RoundedCornerShape(4.dp))
                         .background(Color(settings.accentColor))
                         .clickable { showAccentPicker = true }
                 )
@@ -491,8 +499,8 @@ fun SettingsScreen(
 
             // Background color + gradient
             SettingsRow(
-                label    = "Background",
-                sublabel = if (settings.useGradient) "Gradient" else "Solid color",
+                label    = stringResource(R.string.bg_color),
+                sublabel = if (settings.useGradient) stringResource(R.string.bg_gradient) else stringResource(R.string.bg_solid),
                 icon     = Icons.Default.FormatColorFill
             ) {
                 Row(
@@ -504,6 +512,7 @@ fun SettingsScreen(
                         modifier = Modifier
                             .size(28.dp)
                             .clip(RoundedCornerShape(4.dp))
+                            .border(1.dp, Color(0xFF999999), RoundedCornerShape(4.dp))
                             .background(Color(settings.backgroundColor))
                             .clickable { showBgPicker = true }
                     )
@@ -517,6 +526,7 @@ fun SettingsScreen(
                             modifier = Modifier
                                 .size(28.dp)
                                 .clip(RoundedCornerShape(4.dp))
+                                .border(1.dp, Color(0xFF999999), RoundedCornerShape(4.dp))
                                 .background(Color(settings.gradientEndColor))
                                 .clickable { showGradientEndPicker = true }
                         )
@@ -535,7 +545,7 @@ fun SettingsScreen(
                             contentPadding = PaddingValues(horizontal = 6.dp),
                             modifier = Modifier.height(28.dp)
                         ) {
-                            Text("DEFAULT", color = accent, fontSize = 9.sp, letterSpacing = 1.sp)
+                            Text(stringResource(R.string.bg_default), color = accent, fontSize = 9.sp, letterSpacing = 1.sp)
                         }
                     }
                 }
@@ -545,14 +555,15 @@ fun SettingsScreen(
 
             // Font Color row
             SettingsRow(
-                label    = "Font Color",
-                sublabel = "Custom text color in dark mode",
+                label    = stringResource(R.string.font_color),
+                sublabel = stringResource(R.string.font_color_sub),
                 icon     = Icons.Default.FormatSize
             ) {
                 Box(
                     modifier = Modifier
                         .size(32.dp)
                         .clip(RoundedCornerShape(8.dp))
+                        .border(1.dp, Color(0xFF999999), RoundedCornerShape(4.dp))
                         .background(Color(settings.fontColor))
                         .clickable { showFontColorPicker = true }
                 )
@@ -560,7 +571,7 @@ fun SettingsScreen(
 
             SettingsDivider()
 
-            SettingsRow(label = "Use Gradient", sublabel = "Blend two colors as background", icon = Icons.Default.Gradient) {
+            SettingsRow(label = stringResource(R.string.use_gradient), sublabel = stringResource(R.string.use_gradient_sub), icon = Icons.Default.Gradient) {
                 Switch(checked = settings.useGradient,
                     onCheckedChange = { onUpdate { copy(useGradient = it) } },
                     colors = switchColors(accent))
@@ -569,12 +580,12 @@ fun SettingsScreen(
             if (settings.useGradient) {
                 SettingsDivider()
                 SettingsRow(
-                    label    = "Gradient Direction",
+                    label    = stringResource(R.string.gradient_direction),
                     sublabel = when (settings.gradientDirection) {
-                        GradientDirection.TOP_TO_BOTTOM -> "Top to Bottom"
-                        GradientDirection.LEFT_TO_RIGHT -> "Left to Right"
-                        GradientDirection.DIAGONAL      -> "Diagonal (Linear)"
-                        GradientDirection.RADIAL        -> "Radial (Circular)"
+                        GradientDirection.TOP_TO_BOTTOM -> stringResource(R.string.grad_top_bottom)
+                        GradientDirection.LEFT_TO_RIGHT -> stringResource(R.string.grad_left_right)
+                        GradientDirection.DIAGONAL      -> stringResource(R.string.grad_diagonal)
+                        GradientDirection.RADIAL        -> stringResource(R.string.grad_radial)
                     },
                     icon     = Icons.Default.TrendingFlat
                 ) {
@@ -586,10 +597,10 @@ fun SettingsScreen(
                                 label    = {
                                     Text(
                                         text      = when (dir) {
-                                            GradientDirection.TOP_TO_BOTTOM -> "Vertical"
-                                            GradientDirection.LEFT_TO_RIGHT -> "Horizontal"
-                                            GradientDirection.DIAGONAL      -> "Diagonal"
-                                            GradientDirection.RADIAL        -> "Radial"
+                                            GradientDirection.TOP_TO_BOTTOM -> stringResource(R.string.dir_vertical)
+                                            GradientDirection.LEFT_TO_RIGHT -> stringResource(R.string.dir_horizontal)
+                                            GradientDirection.DIAGONAL      -> stringResource(R.string.dir_diagonal)
+                                            GradientDirection.RADIAL        -> stringResource(R.string.dir_radial)
                                         },
                                         fontSize  = 9.sp,
                                         letterSpacing = 0.5.sp
@@ -597,7 +608,7 @@ fun SettingsScreen(
                                 },
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = accent,
-                                    selectedLabelColor     = onAccentColor(accent)
+                                    selectedLabelColor     = Color.Black
                                 )
                             )
                         }
@@ -609,8 +620,8 @@ fun SettingsScreen(
 
             // Wallpaper
             SettingsButton(
-                label    = "Set Wallpaper",
-                sublabel = if (settings.wallpaperUri.isNotEmpty()) "Custom wallpaper active" else "Choose image from gallery",
+                label    = stringResource(R.string.set_wallpaper),
+                sublabel = if (settings.wallpaperUri.isNotEmpty()) stringResource(R.string.wallpaper_active) else stringResource(R.string.wallpaper_choose),
                 icon     = Icons.Default.Wallpaper,
                 accent   = accent,
                 onClick  = { wallpaperPicker.launch(arrayOf("image/*")) }
@@ -618,7 +629,7 @@ fun SettingsScreen(
             if (settings.wallpaperUri.isNotEmpty()) {
                 Column {
                     SettingsRow(
-                        label    = "Wallpaper Dim",
+                        label    = stringResource(R.string.wallpaper_dim),
                         sublabel = "${"%.0f".format(settings.wallpaperDim * 100)}%",
                         icon     = Icons.Default.BrightnessLow
                     ) {}
@@ -635,15 +646,60 @@ fun SettingsScreen(
                         onClick  = { onUpdate { copy(wallpaperUri = "") } },
                         modifier = Modifier.align(Alignment.End)
                     ) {
-                        Text("REMOVE WALLPAPER", color = Color(0xFF993333), fontSize = 9.sp, letterSpacing = 1.sp)
+                        Text(stringResource(R.string.remove_wallpaper), color = Color(0xFF993333), fontSize = 9.sp, letterSpacing = 1.sp)
+                    }
+                }
+            }
+        }
+
+        // ── Language ─────────────────────────────────────────────────────────
+        SettingsSection(stringResource(R.string.settings_section_language)) {
+            SettingsRow(
+                label    = stringResource(R.string.language_label),
+                sublabel = when (settings.appLanguage) {
+                    AppLanguage.SYSTEM  -> stringResource(R.string.lang_system)
+                    AppLanguage.ENGLISH -> "English"
+                    AppLanguage.POLISH  -> "Polski"
+                    AppLanguage.GERMAN  -> "Deutsch"
+                    AppLanguage.FRENCH  -> "Française"
+                    AppLanguage.SPANISH -> "Español"
+                    AppLanguage.RUSSIAN -> "русский"
+                },
+                icon     = Icons.Default.Language
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    AppLanguage.entries.forEach { lang ->
+                        FilterChip(
+                            selected = settings.appLanguage == lang,
+                            onClick  = { onUpdate { copy(appLanguage = lang) } },
+                            label    = {
+                                Text(
+                                    text = when (lang) {
+                                        AppLanguage.SYSTEM  -> stringResource(R.string.lang_system)
+                                        AppLanguage.ENGLISH -> "English"
+                                        AppLanguage.POLISH  -> "Polski"
+                                        AppLanguage.GERMAN  -> "Deutsch"
+                                        AppLanguage.FRENCH  -> "Française"
+                                        AppLanguage.SPANISH -> "Español"
+                                        AppLanguage.RUSSIAN -> "русский"
+                                    },
+                                    fontSize = 9.sp,
+                                    letterSpacing = 0.5.sp
+                                )
+                            },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = accent,
+                                selectedLabelColor     = Color.Black
+                            )
+                        )
                     }
                 }
             }
         }
 
         // ── Typography ───────────────────────────────────────────────────────
-        SettingsSection("Typography") {
-            SettingsRow(label = "Font", sublabel = fontDisplayName(settings.appFont), icon = Icons.Default.FontDownload) {
+        SettingsSection(stringResource(R.string.settings_section_typography)) {
+            SettingsRow(label = stringResource(R.string.font_label), sublabel = fontDisplayName(settings.appFont), icon = Icons.Default.FontDownload) {
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     com.openlauncher.app.data.AppFont.entries.forEach { font ->
                         FilterChip(
@@ -652,7 +708,7 @@ fun SettingsScreen(
                             label    = { Text(fontDisplayName(font), fontSize = 9.sp, letterSpacing = 0.5.sp) },
                             colors   = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = accent,
-                                selectedLabelColor     = onAccentColor(accent)
+                                selectedLabelColor     = Color.Black
                             )
                         )
                     }
@@ -661,7 +717,7 @@ fun SettingsScreen(
 
             SettingsDivider()
 
-            SettingsRow(label = "Bold Font", sublabel = "Heavier weight across all text", icon = Icons.Default.FormatBold) {
+            SettingsRow(label = stringResource(R.string.bold_font), sublabel = stringResource(R.string.bold_font_sub), icon = Icons.Default.FormatBold) {
                 Switch(
                     checked         = settings.fontBold,
                     onCheckedChange = { onUpdate { copy(fontBold = it) } },
@@ -673,7 +729,7 @@ fun SettingsScreen(
 
             Column {
                 SettingsRow(
-                    label    = "Text Scale",
+                    label    = stringResource(R.string.text_scale),
                     sublabel = "${"%.0f".format(settings.textScale * 100)}%",
                     icon     = Icons.Default.TextFields
                 ) {}
@@ -691,8 +747,8 @@ fun SettingsScreen(
 
             Column {
                 SettingsRow(
-                    label    = "UI Scale",
-                    sublabel = "${"%.0f".format(settings.uiScale * 100)}%  — scales all elements",
+                    label    = stringResource(R.string.ui_scale),
+                    sublabel = "${"%.0f".format(settings.uiScale * 100)}%  — ${stringResource(R.string.ui_scale_sub)}",
                     icon     = Icons.Default.ZoomIn
                 ) {}
                 Slider(
@@ -707,20 +763,25 @@ fun SettingsScreen(
         }
 
         // ── GPS & Calibration ───────────────────────────────────────────────
-        SettingsSection("GPS & Calibration") {
+        SettingsSection(stringResource(R.string.settings_section_gps)) {
             var calibrationStatus by remember { mutableStateOf<String?>(null) }
             val coroutineScope = rememberCoroutineScope()
             var isCalibratingCompass by remember { mutableStateOf(false) }
             var compassCountdown by remember { mutableIntStateOf(0) }
 
+            val agpsClearingMsg = stringResource(R.string.agps_clearing)
+            val agpsSuccessMsg = stringResource(R.string.agps_success)
+            val agpsFailedMsg = stringResource(R.string.agps_failed)
+            val magCompleteMsg = stringResource(R.string.magnetometer_complete)
+
             // 1. Reset A-GPS Button
             SettingsButton(
-                label    = "Reset A-GPS Assistance Data",
-                sublabel = calibrationStatus ?: "Forces cold start to download fresh satellite orbits entirely offline",
+                label    = stringResource(R.string.agps_reset),
+                sublabel = calibrationStatus ?: stringResource(R.string.agps_reset_sub),
                 icon     = Icons.Default.MyLocation,
                 accent   = accent,
                 onClick  = {
-                    calibrationStatus = "Clearing A-GPS cache..."
+                    calibrationStatus = agpsClearingMsg
                     val lm = context.getSystemService(android.content.Context.LOCATION_SERVICE) as android.location.LocationManager
                     var success = false
                     try {
@@ -733,11 +794,7 @@ fun SettingsScreen(
                         e.printStackTrace()
                     }
 
-                    calibrationStatus = if (success) {
-                        "Cold start forced — go outdoors for a fresh satellite lock (2–3 min)"
-                    } else {
-                        "Not supported by this device's GPS driver — no data was cleared"
-                    }
+                    calibrationStatus = if (success) agpsSuccessMsg else agpsFailedMsg
                 }
             )
             
@@ -748,11 +805,11 @@ fun SettingsScreen(
             // diverse readings. The timer guides the sweep; it does not (and
             // cannot) apply offsets itself, so the message must not claim it did.
             SettingsButton(
-                label    = "Magnetometer Sweep (Parking Lot)",
+                label    = stringResource(R.string.magnetometer_sweep),
                 sublabel = if (isCalibratingCompass) {
-                    "Sweep active: Drive slowly in two 360° circles... (${compassCountdown}s remaining)"
+                    stringResource(R.string.magnetometer_active, compassCountdown)
                 } else {
-                    "Guided sweep — Android self-calibrates the compass while you circle"
+                    stringResource(R.string.magnetometer_sub)
                 },
                 icon     = Icons.Default.Navigation,
                 accent   = if (isCalibratingCompass) Color.Green else accent,
@@ -766,7 +823,7 @@ fun SettingsScreen(
                                 compassCountdown--
                             }
                             isCalibratingCompass = false
-                            calibrationStatus = "Sweep complete — check the compass widget; if heading is still off, use the manual offset below"
+                            calibrationStatus = magCompleteMsg
                         }
                     }
                 }
@@ -777,8 +834,8 @@ fun SettingsScreen(
             // 4. Manual Compass Heading Offset Slider
             Column(modifier = Modifier.padding(bottom = 8.dp)) {
                 SettingsRow(
-                    label    = "Compass Heading Offset",
-                    sublabel = "Manual Alignment: ${if (settings.compassOffset >= 0) "+" else ""}${settings.compassOffset.toInt()}°  — aligns compass with vehicle front",
+                    label    = stringResource(R.string.compass_offset_label),
+                    sublabel = stringResource(R.string.compass_offset_sub, if (settings.compassOffset >= 0) "+" else "", settings.compassOffset.toInt()),
                     icon     = Icons.Default.Explore
                 ) {}
                 Slider(
@@ -793,10 +850,10 @@ fun SettingsScreen(
         }
 
         // ── Updates ──────────────────────────────────────────────────────────
-        SettingsSection("Updates") {
+        SettingsSection(stringResource(R.string.settings_section_updates)) {
             SettingsButton(
-                label    = "Check for Updates",
-                sublabel = "View releases on GitHub",
+                label    = stringResource(R.string.check_updates),
+                sublabel = stringResource(R.string.check_updates_sub),
                 icon     = Icons.Default.SystemUpdate,
                 accent   = accent,
                 onClick  = {
@@ -807,7 +864,7 @@ fun SettingsScreen(
         }
 
         // ── Maintenance ──────────────────────────────────────────────────────
-        SettingsSection("Maintenance") {
+        SettingsSection(stringResource(R.string.settings_section_maintenance)) {
             Spacer(Modifier.height(8.dp))
             Button(
                 onClick  = { showResetDialog = true },
@@ -817,7 +874,7 @@ fun SettingsScreen(
             ) {
                 Icon(Icons.Default.RestartAlt, null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("Reset to Defaults", color = MaterialTheme.colorScheme.error, fontSize = 13.sp, letterSpacing = 1.sp)
+                Text(stringResource(R.string.reset_defaults), color = MaterialTheme.colorScheme.error, fontSize = 13.sp, letterSpacing = 1.sp)
             }
             Spacer(Modifier.height(8.dp))
         }
@@ -839,9 +896,9 @@ fun SettingsScreen(
     // ── Dialogs ──────────────────────────────────────────────────────────────
     if (showResetDialog) {
         ConfirmDialog(
-            title        = "Reset Settings",
-            message      = "Are you sure you want to reset all settings to default? This cannot be undone.",
-            confirmLabel = "Reset",
+            title        = stringResource(R.string.reset_dialog_title),
+            message      = stringResource(R.string.reset_dialog_msg),
+            confirmLabel = stringResource(R.string.reset_confirm),
             onConfirm    = { onReset(); showResetDialog = false },
             onDismiss    = { showResetDialog = false }
         )
@@ -849,7 +906,7 @@ fun SettingsScreen(
 
     if (showAccentPicker) {
         ColorPickerDialog(
-            title           = "Accent Color",
+            title           = stringResource(R.string.accent_color),
             initialColor    = Color(settings.accentColor),
             onColorSelected = { c -> onUpdate { copy(accentColor = c.toArgb()) } },
             onDismiss       = { showAccentPicker = false }
@@ -858,7 +915,7 @@ fun SettingsScreen(
 
     if (showBgPicker) {
         ColorPickerDialog(
-            title           = "Background Color",
+            title           = stringResource(R.string.background_color),
             initialColor    = Color(settings.backgroundColor),
             onColorSelected = { c -> 
                 onUpdate { 
@@ -874,7 +931,7 @@ fun SettingsScreen(
 
     if (showGradientEndPicker) {
         ColorPickerDialog(
-            title           = "Gradient End Color",
+            title           = stringResource(R.string.gradient_end_color),
             initialColor    = Color(settings.gradientEndColor),
             onColorSelected = { c -> 
                 onUpdate { 
@@ -890,7 +947,7 @@ fun SettingsScreen(
 
     if (showFontColorPicker) {
         ColorPickerDialog(
-            title           = "Font Color",
+            title           = stringResource(R.string.font_color),
             initialColor    = Color(settings.fontColor),
             onColorSelected = { c -> onUpdate { copy(fontColor = c.toArgb()) } },
             onDismiss       = { showFontColorPicker = false }

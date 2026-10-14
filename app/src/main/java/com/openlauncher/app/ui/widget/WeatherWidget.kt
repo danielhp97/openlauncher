@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.sp
 import com.openlauncher.app.model.WeatherState
 import com.openlauncher.app.util.LocationData
 import kotlin.math.absoluteValue
+import androidx.compose.ui.res.stringResource
+import com.openlauncher.app.R
 
 @Composable
 fun WeatherWidget(
@@ -56,7 +58,7 @@ fun WeatherWidget(
                             )
                             if (showFeelsLike && Math.round(state.feelsLikeCelsius) != Math.round(state.temperatureCelsius)) {
                                 Text(
-                                    text     = "feels ${state.feelsLikeDisplay(metric)}",
+                                    text     = "${stringResource(R.string.feels)} ${state.feelsLikeDisplay(metric)}",
                                     color    = subColor,
                                     fontSize = 10.sp,
                                     modifier = Modifier.padding(bottom = 3.dp)

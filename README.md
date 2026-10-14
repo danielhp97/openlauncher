@@ -7,9 +7,9 @@
   [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 </div>
 
-> **Fork notice:** this is an independent fork of [dw2lam/openlauncher](https://github.com/dw2lam/openlauncher), the original project the sections below describe. Full credit to dw2lam for the foundation this builds on. Development here continues independently going forward rather than through upstream PRs, since the upstream repo hasn't seen maintainer activity in some time.
+> **Fork notice:** this is an independent fork of [feiyin91/openlauncher](https://github.com/feiyin91/openlauncher) which is a for of the [dw2lam/openlauncher](https://github.com/dw2lam/openlauncher), the original project the sections below describe. Full credit to dw2lam for the foundation this builds on. Development here continues independently going forward rather than through upstream PRs, since the upstream repo hasn't seen maintainer activity in some time.
 >
-> **Want a voice assistant too?** [`feat/gemini-voice-assistant`](https://github.com/feiyin91/openlauncher/tree/feat/gemini-voice-assistant) branch adds Gemini-powered voice commands and an offline "Hey [your car's name]" wake word on top of everything below — needs your own free Gemini API key. This branch (`feat/dashboard-enhancements`) stays dependency-free with no extra permissions if you don't want that.
+> **Want a voice assistant too?** Check out [feiyin91/openlauncher](https://github.com/feiyin91/openlauncher) on [`feat/gemini-voice-assistant`](https://github.com/feiyin91/openlauncher/tree/feat/gemini-voice-assistant) branch, which adds Gemini-powered voice commands and an offline "Hey [your car's name]" wake word on top of everything below — needs your own free Gemini API key. This branch (`feat/dashboard-enhancements`) stays dependency-free with no extra permissions if you don't want that.
 
 ---
 
@@ -96,7 +96,8 @@ Forced Dark, Forced Light, System Sync (follows the head unit's own setting), or
 A calibration offset for devices whose GPS chips report inaccurate baselines, accessible from the trip meter settings.
 
 ### 📱 Picture-in-Picture overlay ⚠️ *Beta, inherited from upstream*
-Launch any app as a floating freeform window. Requires the special `openlauncher-test-pip` build (relies on AOSP platform-level signing) — not in the standard APK. Expect rough edges; compatibility varies heavily by head unit ROM.
+~Launch any app as a floating freeform window. Requires the special `openlauncher-test-pip` build (relies on AOSP platform-level signing) — not in the standard APK. Expect rough edges; compatibility varies heavily by head unit ROM.~
+This feature is abandoned.
 
 ### 🔔 First-run onboarding
 Explains key permissions (location, notification listener, draw-over-apps) before requesting them, with direct links to the relevant system settings screens.
@@ -105,8 +106,8 @@ Explains key permissions (location, notification listener, draw-over-apps) befor
 
 ## 🗺️ Roadmap
 
-- [ ] **Advanced color engine** — per-element hex control for every UI surface, to precisely match a specific dashboard's ambient lighting.
-- [ ] **Universal theming engine** — a standardized way to build, share, and install full visual themes.
+- [ ] ~**Advanced color engine** — per-element hex control for every UI surface, to precisely match a specific dashboard's ambient lighting.~
+- [ ] ~**Universal theming engine** — a standardized way to build, share, and install full visual themes.~
 
 ---
 
@@ -122,4 +123,4 @@ Whether you're a developer, a designer, or just testing it in your own car:
 
 ## 📄 License
 
-MIT — see [LICENSE](LICENSE). Credit to [dw2lam](https://github.com/dw2lam/openlauncher) for the original project.
+MIT — see [LICENSE](LICENSE). Credit to [dw2lam](https://github.com/dw2lam/openlauncher) for the original project and [feiyin91](https://github.com/feiyin91) for his later updates.
