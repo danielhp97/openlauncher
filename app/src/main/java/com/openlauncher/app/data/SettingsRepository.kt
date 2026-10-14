@@ -29,6 +29,7 @@ class SettingsRepository(private val context: Context) {
         val CLOCK_STYLE        = stringPreferencesKey("clock_style")
         val UNIT_SYSTEM        = stringPreferencesKey("unit_system")
         val APP_FONT           = stringPreferencesKey("app_font")
+        val APP_LANGUAGE       = stringPreferencesKey("app_language")
         val SHOW_WEATHER       = booleanPreferencesKey("show_weather")
         val SHOW_CLOCK         = booleanPreferencesKey("show_clock")
         val SHOW_TELEMETRY     = booleanPreferencesKey("show_telemetry")
@@ -115,6 +116,7 @@ class SettingsRepository(private val context: Context) {
                 clockStyle     = prefs[Keys.CLOCK_STYLE]?.let { runCatching { ClockStyle.valueOf(it) }.getOrNull() } ?: defaults.clockStyle,
                 unitSystem     = prefs[Keys.UNIT_SYSTEM]?.let { runCatching { UnitSystem.valueOf(it) }.getOrNull() } ?: defaults.unitSystem,
                 appFont        = prefs[Keys.APP_FONT]?.let { runCatching { AppFont.valueOf(it) }.getOrNull() } ?: defaults.appFont,
+                appLanguage    = prefs[Keys.APP_LANGUAGE]?.let { runCatching { AppLanguage.valueOf(it) }.getOrNull() } ?: defaults.appLanguage,
                 showWeather    = prefs[Keys.SHOW_WEATHER]     ?: defaults.showWeather,
                 showClock      = prefs[Keys.SHOW_CLOCK]       ?: defaults.showClock,
                 showTelemetry  = prefs[Keys.SHOW_TELEMETRY]   ?: defaults.showTelemetry,
@@ -194,6 +196,7 @@ class SettingsRepository(private val context: Context) {
             prefs[Keys.CLOCK_STYLE]        = s.clockStyle.name
             prefs[Keys.UNIT_SYSTEM]        = s.unitSystem.name
             prefs[Keys.APP_FONT]           = s.appFont.name
+            prefs[Keys.APP_LANGUAGE]       = s.appLanguage.name
             prefs[Keys.SHOW_WEATHER]       = s.showWeather
             prefs[Keys.SHOW_CLOCK]         = s.showClock
             prefs[Keys.SHOW_TELEMETRY]     = s.showTelemetry

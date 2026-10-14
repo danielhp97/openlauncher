@@ -4,6 +4,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
+import androidx.compose.ui.res.stringResource
+import com.openlauncher.app.R
+
 @Composable
 fun ConfirmDialog(
     title: String,
@@ -23,7 +26,7 @@ fun ConfirmDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel", color = Color(0xFFAAAAAA))
+                Text(stringResource(R.string.cancel), color = Color(0xFFAAAAAA))
             }
         },
         // The dialog surface is always dark, so pin light content colors —

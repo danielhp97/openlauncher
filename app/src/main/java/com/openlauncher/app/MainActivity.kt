@@ -1,6 +1,7 @@
 package com.openlauncher.app
 
 import android.Manifest
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,6 +24,14 @@ import coil.compose.AsyncImage
 import com.openlauncher.app.data.DayNightMode
 import com.openlauncher.app.data.SidebarPosition
 import com.openlauncher.app.data.GradientDirection
+import com.openlauncher.app.data.AppLanguage
+import android.content.res.Configuration
+import android.content.res.Resources
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.core.os.ConfigurationCompat
+import java.util.Locale
 import com.openlauncher.app.model.NavDestination
 import com.openlauncher.app.ui.components.Sidebar
 import com.openlauncher.app.ui.screen.*
@@ -32,6 +41,38 @@ import com.openlauncher.app.viewmodel.LauncherViewModel
 class MainActivity : ComponentActivity() {
 
     private val vm: LauncherViewModel by viewModels()
+
+    private fun updateAppLocale(language: AppLanguage) {
+        val targetLocale = when (language) {
+            AppLanguage.ENGLISH -> Locale.ENGLISH
+            AppLanguage.POLISH  -> Locale.forLanguageTag("pl")
+            AppLanguage.GERMAN  -> Locale.forLanguageTag("de")
+            AppLanguage.SPANISH -> Locale.forLanguageTag("es")
+            AppLanguage.FRENCH  -> Locale.forLanguageTag("fr")
+            AppLanguage.RUSSIAN -> Locale.forLanguageTag("ru")
+            AppLanguage.SYSTEM  -> {
+                val systemLang = Resources.getSystem()
+                    .configuration.locales[0].language
+                if (systemLang.equals("pl", ignoreCase = true)) {
+                    Locale.forLanguageTag("pl")
+                } else if (systemLang.equals("de", ignoreCase = true)) {
+                    Locale.forLanguageTag("de")
+                } else if (systemLang.equals("es", ignoreCase = true)) {
+                    Locale.forLanguageTag("es")
+                } else if (systemLang.equals("fr", ignoreCase = true)) {
+                    Locale.forLanguageTag("fr")
+                } else if (systemLang.equals("ru", ignoreCase = true)) {
+                    Locale.forLanguageTag("ru")
+                } else {
+                    Locale.ENGLISH
+                }
+            }
+        }
+        Locale.setDefault(targetLocale)
+        val config = resources.configuration
+        config.setLocale(targetLocale)
+        resources.updateConfiguration(config, resources.displayMetrics)
+    }
 
     private val locationPermissions = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -55,6 +96,15 @@ class MainActivity : ComponentActivity() {
         if (hasFocus) hideSystemBars()
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (intent.action == android.content.Intent.ACTION_MAIN &&
+            intent.hasCategory(android.content.Intent.CATEGORY_HOME)
+        ) {
+            vm.navigate(NavDestination.HOME)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         hideSystemBars()
@@ -62,6 +112,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             val settingsLoaded by vm.settingsLoaded.collectAsStateWithLifecycle()
             val settings       by vm.settings.collectAsStateWithLifecycle()
+            
+            LaunchedEffect(settings.appLanguage) {
+                updateAppLocale(settings.appLanguage)
+            }
+
             val nav            by vm.nav.collectAsStateWithLifecycle()
             val apps        by vm.apps.collectAsStateWithLifecycle()
             val appsLoading by vm.appsLoading.collectAsStateWithLifecycle()
@@ -102,8 +157,45 @@ class MainActivity : ComponentActivity() {
                 }
             } else null
 
+            val currentContext = LocalContext.current
+            val localizedContext = remember(settings.appLanguage, currentContext) {
+                val targetLocale = when (settings.appLanguage) {
+                    AppLanguage.ENGLISH -> Locale.ENGLISH
+                    AppLanguage.POLISH  -> Locale.forLanguageTag("pl")
+                    AppLanguage.GERMAN  -> Locale.forLanguageTag("de")
+                    AppLanguage.SPANISH -> Locale.forLanguageTag("es")
+                    AppLanguage.FRENCH  -> Locale.forLanguageTag("fr")
+                    AppLanguage.RUSSIAN -> Locale.forLanguageTag("ru")
+                    AppLanguage.SYSTEM  -> {
+                        val systemLang = Resources.getSystem()
+                            .configuration.locales[0].language
+                        if (systemLang.equals("pl", ignoreCase = true)) {
+                            Locale.forLanguageTag("pl")
+                        } else if (systemLang.equals("de", ignoreCase = true)) {
+                            Locale.forLanguageTag("de")
+                        } else if (systemLang.equals("es", ignoreCase = true)) {
+                            Locale.forLanguageTag("es")
+                        } else if (systemLang.equals("fr", ignoreCase = true)) {
+                            Locale.forLanguageTag("fr")
+                        } else if (systemLang.equals("ru", ignoreCase = true)) {
+                            Locale.forLanguageTag("ru")
+                        } else {
+                            Locale.ENGLISH
+                        }
+                    }
+                }
+                Locale.setDefault(targetLocale)
+                val config = Configuration(currentContext.resources.configuration)
+                config.setLocale(targetLocale)
+                currentContext.createConfigurationContext(config)
+            }
+
+            val activity: ComponentActivity = this
             val baseDensity = LocalDensity.current
             CompositionLocalProvider(
+                androidx.activity.compose.LocalActivityResultRegistryOwner provides activity,
+                LocalContext provides localizedContext,
+                LocalConfiguration provides localizedContext.resources.configuration,
                 LocalDensity provides Density(
                     density   = baseDensity.density * settings.uiScale,
                     fontScale = baseDensity.fontScale
@@ -256,10 +348,10 @@ class MainActivity : ComponentActivity() {
                                         pickerSlot          = pickerSlot,
                                         isCarPlayPickerMode = appPickerTarget != null,
                                         carPlayPickerLabel  = when (appPickerTarget) {
-                                            com.openlauncher.app.viewmodel.LauncherViewModel.AppPickerTarget.ANDROID_AUTO -> "CHOOSE ANDROID AUTO APP"
-                                            com.openlauncher.app.viewmodel.LauncherViewModel.AppPickerTarget.PIP          -> "CHOOSE PIP APP"
-                                            com.openlauncher.app.viewmodel.LauncherViewModel.AppPickerTarget.RADIO        -> "CHOOSE RADIO APP"
-                                            else -> "CHOOSE CARPLAY APP"
+                                            com.openlauncher.app.viewmodel.LauncherViewModel.AppPickerTarget.ANDROID_AUTO -> stringResource(R.string.choose_android_auto_app)
+                                            com.openlauncher.app.viewmodel.LauncherViewModel.AppPickerTarget.PIP          -> stringResource(R.string.choose_pip_app)
+                                            com.openlauncher.app.viewmodel.LauncherViewModel.AppPickerTarget.RADIO        -> stringResource(R.string.choose_radio_app)
+                                            else -> stringResource(R.string.choose_carplay_app)
                                         },
                                         accent              = accent,
                                         onAppClick          = { app -> vm.launchApp(app.packageName) },

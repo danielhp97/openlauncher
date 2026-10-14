@@ -29,6 +29,8 @@ import kotlin.math.sin
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.Bluetooth
+import androidx.compose.ui.res.stringResource
+import com.openlauncher.app.R
 
 @Composable
 fun ClockWidget(
@@ -318,21 +320,56 @@ private fun AnalogClock(cal: Calendar, accent: Color, isDayMode: Boolean = false
     }
 }
 
+@Composable
 private fun shortDateString(cal: Calendar): String {
-    val days   = arrayOf("SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT")
-    return "${days[cal.get(Calendar.DAY_OF_WEEK) - 1]} ${cal.get(Calendar.DAY_OF_MONTH)}"
+    val dayOfWeekIndex = cal.get(Calendar.DAY_OF_WEEK) - 1
+    val shortDay = when (dayOfWeekIndex) {
+        0 -> stringResource(R.string.short_day_0)
+        1 -> stringResource(R.string.short_day_1)
+        2 -> stringResource(R.string.short_day_2)
+        3 -> stringResource(R.string.short_day_3)
+        4 -> stringResource(R.string.short_day_4)
+        5 -> stringResource(R.string.short_day_5)
+        else -> stringResource(R.string.short_day_6)
+    }
+    return "${shortDay} ${cal.get(Calendar.DAY_OF_MONTH)}"
 }
 
+@Composable
 private fun buildDateString(cal: Calendar): String {
-    val days   = arrayOf("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
-    val months = arrayOf("January", "February", "March", "April", "May", "June",
-                         "July", "August", "September", "October", "November", "December")
-    return "${days[cal.get(Calendar.DAY_OF_WEEK) - 1]}, ${months[cal.get(Calendar.MONTH)]} ${cal.get(Calendar.DAY_OF_MONTH)}"
+    val dayOfWeekIndex = cal.get(Calendar.DAY_OF_WEEK) - 1
+    val dayOfWeek = when (dayOfWeekIndex) {
+        0 -> stringResource(R.string.day_0)
+        1 -> stringResource(R.string.day_1)
+        2 -> stringResource(R.string.day_2)
+        3 -> stringResource(R.string.day_3)
+        4 -> stringResource(R.string.day_4)
+        5 -> stringResource(R.string.day_5)
+        else -> stringResource(R.string.day_6)
+    }
+    val dayOfMonth = cal.get(Calendar.DAY_OF_MONTH)
+    val monthIndex = cal.get(Calendar.MONTH)
+    val month = when (monthIndex) {
+        0 -> stringResource(R.string.month_0)
+        1 -> stringResource(R.string.month_1)
+        2 -> stringResource(R.string.month_2)
+        3 -> stringResource(R.string.month_3)
+        4 -> stringResource(R.string.month_4)
+        5 -> stringResource(R.string.month_5)
+        6 -> stringResource(R.string.month_6)
+        7 -> stringResource(R.string.month_7)
+        8 -> stringResource(R.string.month_8)
+        9 -> stringResource(R.string.month_9)
+        10 -> stringResource(R.string.month_10)
+        else -> stringResource(R.string.month_11)
+    }
+    return "${dayOfWeek}, ${dayOfMonth} ${month}"
 }
 
+@Composable
 fun clockTimeLabel(cal: Calendar): String = when (cal.get(Calendar.HOUR_OF_DAY)) {
-    in 5..11  -> "MORNING"
-    in 12..16 -> "AFTERNOON"
-    in 17..20 -> "EVENING"
-    else      -> "NIGHT"
+    in 5..11  -> stringResource(R.string.time_morning)
+    in 12..16 -> stringResource(R.string.time_afternoon)
+    in 17..20 -> stringResource(R.string.time_evening)
+    else      -> stringResource(R.string.time_night)
 }

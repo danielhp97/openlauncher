@@ -16,6 +16,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.openlauncher.app.R
 import com.openlauncher.app.ui.theme.accentPresetLabels
 import com.openlauncher.app.ui.theme.accentPresets
 
@@ -57,7 +59,7 @@ fun ColorPickerDialog(
         text  = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 // Preset swatches
-                Text("Presets", style = MaterialTheme.typography.labelMedium, color = Color(0xFF888888))
+                Text(stringResource(R.string.presets), style = MaterialTheme.typography.labelMedium, color = Color(0xFF888888))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     accentPresets.forEachIndexed { i, color ->
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -169,7 +171,7 @@ fun ColorPickerDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel", color = Color(0xFFAAAAAA)) }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), color = Color(0xFFAAAAAA)) }
         }
     )
 }

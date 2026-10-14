@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.openlauncher.app.util.LocationData
 import kotlin.math.absoluteValue
+import androidx.compose.ui.res.stringResource
+import com.openlauncher.app.R
 
 @Composable
 fun LocationWidget(
@@ -40,7 +42,7 @@ fun LocationWidget(
                 Icon(Icons.Default.GpsOff, null, tint = dimColor, modifier = Modifier.size(22.dp))
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    "NO GPS FIX", color = dimColor, fontSize = 9.sp,
+                    stringResource(R.string.no_gps_fix), color = dimColor, fontSize = 9.sp,
                     fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, letterSpacing = 1.5.sp
                 )
             }
@@ -55,7 +57,7 @@ fun LocationWidget(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        "LIVE LOCATION", color = labelColor, fontSize = 9.sp,
+                        stringResource(R.string.live_location), color = labelColor, fontSize = 9.sp,
                         fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, letterSpacing = 1.5.sp
                     )
                     Icon(Icons.Default.GpsFixed, null, tint = accent.copy(alpha = 0.7f), modifier = Modifier.size(14.dp))
@@ -85,7 +87,7 @@ fun LocationWidget(
                 }
 
                 Text(
-                    text = "±${location.accuracy.toInt()}m ACCURACY",
+                    text = "±${location.accuracy.toInt()}m ${stringResource(R.string.gps_accuracy)}",
                     color = dimColor, fontSize = 8.sp, fontFamily = FontFamily.Monospace, letterSpacing = 0.5.sp
                 )
             }

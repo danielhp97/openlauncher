@@ -28,6 +28,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.openlauncher.app.R
 
 /**
  * WiFi/Bluetooth/DND access from the home grid instead of Android's settings menus —
@@ -66,10 +68,12 @@ fun QuickTogglesWidget(
     LaunchedEffect(Unit) {
         while (true) {
             wifiOn = wifiManager?.isWifiEnabled == true
-            dndOn = notificationManager?.let {
-                it.isNotificationPolicyAccessGranted &&
-                    it.currentInterruptionFilter == NotificationManager.INTERRUPTION_FILTER_NONE
-            } ?: false
+            try {
+                dndOn = notificationManager?.let {
+                    it.isNotificationPolicyAccessGranted &&
+                            it.currentInterruptionFilter == NotificationManager.INTERRUPTION_FILTER_NONE
+                } ?: false
+            } catch (e: Exception) {}
             kotlinx.coroutines.delay(2000)
         }
     }
@@ -116,17 +120,17 @@ fun QuickTogglesWidget(
         verticalAlignment = Alignment.CenterVertically
     ) {
         ToggleTile(
-            icon = Icons.Default.Wifi, label = "WIFI", active = wifiOn,
+            icon = Icons.Default.Wifi, label = stringResource(R.string.wifi), active = wifiOn,
             accent = accent, isDayMode = isDayMode,
             onClick = { if (!isEditing) openWifiPanel() }
         )
         ToggleTile(
-            icon = Icons.Default.Bluetooth, label = "PAIR", active = false,
+            icon = Icons.Default.Bluetooth, label = stringResource(R.string.bluetooth), active = false,
             accent = accent, isDayMode = isDayMode,
             onClick = { if (!isEditing) openBluetoothSettings() }
         )
         ToggleTile(
-            icon = Icons.Default.DoNotDisturbOn, label = "DND", active = dndOn,
+            icon = Icons.Default.DoNotDisturbOn, label = stringResource(R.string.dnd), active = dndOn,
             accent = accent, isDayMode = isDayMode,
             onClick = { if (!isEditing) toggleDnd() }
         )
