@@ -1,11 +1,14 @@
 package com.openlauncher.app.viewmodel
 
 import android.app.Application
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.database.ContentObserver
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.os.BatteryManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -219,6 +222,9 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                 "VITALS"      -> copy(showVitals = true)
                 "TRIP_TRACKER" -> copy(showTripTracker = true)
                 "SOUNDBOARD"  -> copy(showSoundboard = true)
+                "FUEL_LOG"    -> copy(showFuelLog = true)
+                "QUICK_TOGGLES" -> copy(showQuickToggles = true)
+                "LOCATION"    -> copy(showLocation = true)
                 else          -> this
             }
             val idx       = layout.indexOfFirst { it.id == id }
@@ -250,8 +256,54 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                 "VITALS"      -> copy(showVitals = false)
                 "TRIP_TRACKER" -> copy(showTripTracker = false)
                 "SOUNDBOARD"  -> copy(showSoundboard = false)
+                "FUEL_LOG"    -> copy(showFuelLog = false)
+                "QUICK_TOGGLES" -> copy(showQuickToggles = false)
+                "LOCATION"    -> copy(showLocation = false)
                 else          -> this
             }
+        }
+    }
+
+    fun addFuelEntry(odometerKm: Double, volume: Double, cost: Double) {
+        updateSettings {
+            val entry = com.openlauncher.app.data.FuelEntry(
+                timestampMs = System.currentTimeMillis(),
+                odometerKm  = odometerKm,
+                volume      = volume,
+                cost        = cost,
+                isMetric    = unitSystem == com.openlauncher.app.data.UnitSystem.METRIC
+            )
+            copy(fuelLog = (fuelLog + entry).sortedBy { it.timestampMs })
+        }
+    }
+
+    fun deleteFuelEntry(timestampMs: Long) {
+        updateSettings { copy(fuelLog = fuelLog.filterNot { it.timestampMs == timestampMs }) }
+    }
+
+    /**
+     * Replaces the widget grid wholesale with a named preset (e.g. [splitPanelWidgetLayout])
+     * and syncs each toggleable widget's show-flag to whether it's present in the preset,
+     * so the grid renders exactly the preset with no stray widgets left enabled from before.
+     */
+    fun applyLayoutPreset(preset: List<com.openlauncher.app.data.WidgetConfig>) {
+        updateSettings {
+            val presentIds = preset.map { it.id }.toSet()
+            val withShow = copy(
+                showClock        = "CLOCK" in presentIds,
+                showWeather      = "WEATHER" in presentIds,
+                showNowPlaying   = "NOW_PLAYING" in presentIds,
+                showTelemetry    = "TELEMETRY" in presentIds,
+                showAltimeter    = "ALTIMETER" in presentIds,
+                showSpeedometer  = "SPEEDOMETER" in presentIds,
+                showVitals       = "VITALS" in presentIds,
+                showTripTracker  = "TRIP_TRACKER" in presentIds,
+                showSoundboard   = "SOUNDBOARD" in presentIds
+            )
+            // Keep any widget configs not part of this preset around (disabled) so their
+            // spans/positions aren't lost if the user switches presets again later.
+            val untouched = widgetLayout.filter { it.id !in presentIds }
+            withShow.copy(widgetLayout = preset + untouched)
         }
     }
 
@@ -374,6 +426,11 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
     val weatherError: StateFlow<String?> = _weatherError
 
     private var weatherJob: Job? = null
+    // Stamped on successful fetch only (see fetchWeather/fetchPlaceName) — if these
+    // were stamped on *attempt*, a single failure right at boot (network not up yet)
+    // would lock the panel empty for a full throttle window instead of retrying.
+    private var lastWeatherFetchMs = 0L
+    private var lastPlaceFetchMs = 0L
 
     fun fetchWeather(lat: Double, lon: Double, metric: Boolean) {
         weatherJob?.cancel()
@@ -384,16 +441,90 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                 // the value through two lossy conversions
                 val resp = WeatherApi.service.getForecast(lat, lon, temperatureUnit = "celsius")
                 resp.currentWeather?.let { cw ->
+                    // Open-Meteo's hourly block is parallel arrays keyed by ISO timestamp
+                    // ("2026-08-12T23:00") — keep only points from the current hour onward
+                    // so the strip reads as "coming up," not partly-past.
+                    val nowIso = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:00", java.util.Locale.US)
+                        .format(java.util.Date())
+                    val hourly = resp.hourly
+                    val currentHourIndices = hourly?.time?.indices
+                        ?.filter { hourly.time[it] >= nowIso }
+                        ?.take(6) ?: emptyList()
+                    val forecast = if (hourly != null) {
+                        currentHourIndices.mapNotNull { i ->
+                                val hourStr = hourly.time.getOrNull(i)?.takeLast(5)?.take(2) ?: return@mapNotNull null
+                                val hour = hourStr.toIntOrNull() ?: return@mapNotNull null
+                                com.openlauncher.app.model.HourlyPoint(
+                                    hour               = hour,
+                                    temperatureCelsius = hourly.temperature2m.getOrNull(i) ?: return@mapNotNull null,
+                                    weatherCode        = hourly.weathercode.getOrNull(i) ?: 0,
+                                    isDay              = hour in 6..17,
+                                    precipitationChance = hourly.precipitationProbability.getOrNull(i) ?: 0
+                                )
+                            }
+                    } else emptyList()
+                    // First index in the "current hour onward" filter above is the
+                    // present hour itself — reuse it rather than a second lookup.
+                    val feelsLike = currentHourIndices.firstOrNull()
+                        ?.let { hourly?.apparentTemperature?.getOrNull(it) } ?: cw.temperature
+
                     _weather.value = WeatherState(
                         temperatureCelsius = cw.temperature,
                         weatherCode       = cw.weathercode,
                         windspeedKmh      = cw.windspeed,
-                        isDay             = cw.isDay == 1
+                        isDay             = cw.isDay == 1,
+                        hourlyForecast    = forecast,
+                        feelsLikeCelsius  = feelsLike
                     )
                 }
                 _weatherError.value = null
+                lastWeatherFetchMs = System.currentTimeMillis()
             } catch (e: Exception) {
                 _weatherError.value = e.message
+                // Deliberately not stamping lastWeatherFetchMs — leaving it at its
+                // last successful value means the next location/minute tick retries
+                // immediately instead of waiting out the full throttle window.
+            }
+        }
+    }
+
+    // ── Reverse geocoding (coordinates → place name) ───────────────────────────
+    private val _placeName = MutableStateFlow<String?>(null)
+    val placeName: StateFlow<String?> = _placeName
+
+    fun fetchPlaceName(lat: Double, lon: Double) {
+        viewModelScope.launch {
+            try {
+                val resp = com.openlauncher.app.data.NominatimApi.service.reverseGeocode(lat, lon)
+                val addr = resp.address
+                // Always request finest detail from the API; which fields we actually
+                // show is a client-side choice per locationDetailLevel, so switching
+                // the setting doesn't need a fresh network call.
+                //
+                // "Broader" is the wrapper locality — city, or the nearest thing to
+                // it (falls back to state/county for places with no city field, e.g.
+                // some rural areas). "Fine" is the specific neighbourhood/quarter.
+                // Paired as "Broader, Fine" — e.g. "Singapore, Boon Keng" or
+                // "Johor Bahru, Megah Ria" — not paired with state, which is often
+                // too coarse to add anything (and Singapore has no state at all).
+                val broader = addr?.city ?: addr?.town ?: addr?.village ?: addr?.county ?: addr?.state
+                val fine = addr?.neighbourhood ?: addr?.quarter ?: addr?.suburb ?: addr?.cityDistrict
+                val resolved = when (settings.value.locationDetailLevel) {
+                    com.openlauncher.app.data.LocationDetailLevel.NEIGHBORHOOD -> when {
+                        fine != null && broader != null && fine != broader -> "$broader, $fine"
+                        fine != null -> fine
+                        else -> broader
+                    }
+                    com.openlauncher.app.data.LocationDetailLevel.CITY -> broader
+                    com.openlauncher.app.data.LocationDetailLevel.REGION -> addr?.state ?: addr?.county ?: broader
+                } ?: resp.displayName?.split(",")?.map { it.trim() }?.take(2)?.joinToString(", ")
+                if (resolved != null) {
+                    _placeName.value = resolved
+                    lastPlaceFetchMs = System.currentTimeMillis()
+                }
+            } catch (_: Exception) {
+                // transient network hiccup — leave the last known place name showing,
+                // and leave lastPlaceFetchMs unstamped so the next tick retries soon
             }
         }
     }
@@ -643,29 +774,68 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    // ── Voltage ───────────────────────────────────────────────────────────────
+    // Most aftermarket head units have no real internal battery — the vendor ROM
+    // wires the car's 12V input straight into Android's standard battery-voltage
+    // reporting (the same field a phone would use for its own cell), so this reads
+    // through the public BatteryManager API rather than anything unit-specific.
+    private val _voltage = MutableStateFlow<Float?>(null)
+    val voltage: StateFlow<Float?> = _voltage
+
+    private val batteryReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val millivolts = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1)
+            // A real car electrical system is never anywhere near 0V while the unit
+            // is on — this unit's standard-Android battery field turned out to be a
+            // meaningless placeholder, not the real CAN-bus-fed voltage sensor its
+            // own status bar reads from. Better to show nothing than a false 0.0V.
+            if (millivolts >= 5000) _voltage.value = millivolts / 1000f
+        }
+    }
+
+    private fun startVoltageObserver() {
+        runCatching {
+            getApplication<Application>().registerReceiver(batteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
         locationMgr.stop()
         radioObserver?.let { getApplication<Application>().contentResolver.unregisterContentObserver(it) }
         radioObserver = null
+        runCatching { getApplication<Application>().unregisterReceiver(batteryReceiver) }
     }
 
     init {
         loadInstalledApps()
         refreshConnectivity()
+        startVoltageObserver()
         if (hasSzchoicewayMcu) startHardwareRadioObserver()
-        // Fetch weather on first location fix, then every 30 minutes.
-        // The minute ticker covers the parked case where no location updates arrive.
+        // Weather refreshes every 30 minutes (conditions don't change fast enough
+        // to justify more). Place name refresh interval is user-configurable
+        // (Settings > Location Refresh, 30s/1min/2min/5min — default 30s); the
+        // Nominatim usage policy caps at 1 req/sec, and even the fastest option
+        // is nowhere near that. Note this only actually tightens the refresh
+        // while driving (GPS fires new fixes every few seconds on movement);
+        // parked, the retry cadence is still bottlenecked by the once-a-minute
+        // ticker below, since a stationary GPS provider won't emit new updates
+        // at all — that ticker covers the parked case where no location updates arrive.
         viewModelScope.launch {
-            var lastFetchMs = 0L
             merge(
                 locationMgr.location.filterNotNull(),
                 minuteTicker.mapNotNull { locationMgr.location.value }
             ).collect { loc ->
                 val now = System.currentTimeMillis()
-                if (now - lastFetchMs >= 30 * 60 * 1_000L) {
-                    lastFetchMs = now
+                // lastWeatherFetchMs/lastPlaceFetchMs are only stamped on a *successful*
+                // fetch (see fetchWeather/fetchPlaceName), so a failed attempt — e.g. right
+                // at boot before the network is up — retries on the next tick instead of
+                // locking the panel empty for the rest of the throttle window.
+                if (now - lastWeatherFetchMs >= 30 * 60 * 1_000L) {
                     fetchWeather(loc.latitude, loc.longitude, settings.value.unitSystem.name == "METRIC")
+                }
+                if (now - lastPlaceFetchMs >= settings.value.locationRefreshInterval.millis) {
+                    fetchPlaceName(loc.latitude, loc.longitude)
                 }
             }
         }

@@ -59,6 +59,20 @@ class SettingsRepository(private val context: Context) {
         val SPEEDOMETER_DIGITAL_ONLY = booleanPreferencesKey("speedometer_digital_only")
         val GRADIENT_DIRECTION    = stringPreferencesKey("gradient_direction")
         val USE_CUSTOM_BG_COLOR   = booleanPreferencesKey("use_custom_bg_color")
+        val SHOW_FUEL_LOG         = booleanPreferencesKey("show_fuel_log")
+        val FUEL_LOG_JSON         = stringPreferencesKey("fuel_log_json")
+        val SHOW_QUICK_TOGGLES    = booleanPreferencesKey("show_quick_toggles")
+        val THEME_ID              = stringPreferencesKey("theme_id")
+        val SHOW_LOCATION         = booleanPreferencesKey("show_location")
+        val LOCATION_DETAIL_LEVEL = stringPreferencesKey("location_detail_level")
+        val LOCATION_REFRESH_INTERVAL = stringPreferencesKey("location_refresh_interval")
+        val SHOW_WIND_SPEED       = booleanPreferencesKey("show_wind_speed")
+        val SHOW_FEELS_LIKE       = booleanPreferencesKey("show_feels_like")
+        val SHOW_RAIN_CHANCE      = booleanPreferencesKey("show_rain_chance")
+        val SHOW_SUNRISE_SUNSET   = booleanPreferencesKey("show_sunrise_sunset")
+        val SHOW_QUICK_TOGGLES_IN_CLOCK = booleanPreferencesKey("show_quick_toggles_in_clock")
+        val SHOW_NOW_PLAYING_SOURCE_BADGE = booleanPreferencesKey("show_now_playing_source_badge")
+        val USE_24_HOUR_FORMAT    = booleanPreferencesKey("use_24_hour_format")
     }
 
     val settingsFlow: Flow<AppSettings> = context.dataStore.data
@@ -134,7 +148,25 @@ class SettingsRepository(private val context: Context) {
                 vitalsAsBars     = prefs[Keys.VITALS_AS_BARS] ?: defaults.vitalsAsBars,
                 speedometerDigitalOnly = prefs[Keys.SPEEDOMETER_DIGITAL_ONLY] ?: defaults.speedometerDigitalOnly,
                 gradientDirection = prefs[Keys.GRADIENT_DIRECTION]?.let { runCatching { GradientDirection.valueOf(it) }.getOrNull() } ?: defaults.gradientDirection,
-                useCustomBackgroundColor = prefs[Keys.USE_CUSTOM_BG_COLOR] ?: defaults.useCustomBackgroundColor
+                useCustomBackgroundColor = prefs[Keys.USE_CUSTOM_BG_COLOR] ?: defaults.useCustomBackgroundColor,
+                showFuelLog      = prefs[Keys.SHOW_FUEL_LOG]    ?: defaults.showFuelLog,
+                fuelLog          = prefs[Keys.FUEL_LOG_JSON]?.let {
+                    runCatching {
+                        gson.fromJson<List<FuelEntry>>(it, object : TypeToken<List<FuelEntry>>() {}.type)
+                    }.getOrNull()
+                } ?: defaults.fuelLog,
+                showQuickToggles = prefs[Keys.SHOW_QUICK_TOGGLES] ?: defaults.showQuickToggles,
+                themeId          = prefs[Keys.THEME_ID] ?: defaults.themeId,
+                showLocation     = prefs[Keys.SHOW_LOCATION] ?: defaults.showLocation,
+                locationDetailLevel = prefs[Keys.LOCATION_DETAIL_LEVEL]?.let { runCatching { LocationDetailLevel.valueOf(it) }.getOrNull() } ?: defaults.locationDetailLevel,
+                locationRefreshInterval = prefs[Keys.LOCATION_REFRESH_INTERVAL]?.let { runCatching { LocationRefreshInterval.valueOf(it) }.getOrNull() } ?: defaults.locationRefreshInterval,
+                showWindSpeed    = prefs[Keys.SHOW_WIND_SPEED] ?: defaults.showWindSpeed,
+                showFeelsLike    = prefs[Keys.SHOW_FEELS_LIKE] ?: defaults.showFeelsLike,
+                showRainChance   = prefs[Keys.SHOW_RAIN_CHANCE] ?: defaults.showRainChance,
+                showSunriseSunset = prefs[Keys.SHOW_SUNRISE_SUNSET] ?: defaults.showSunriseSunset,
+                showQuickTogglesInClock = prefs[Keys.SHOW_QUICK_TOGGLES_IN_CLOCK] ?: defaults.showQuickTogglesInClock,
+                showNowPlayingSourceBadge = prefs[Keys.SHOW_NOW_PLAYING_SOURCE_BADGE] ?: defaults.showNowPlayingSourceBadge,
+                use24HourFormat  = prefs[Keys.USE_24_HOUR_FORMAT] ?: defaults.use24HourFormat
             )
     }
 
@@ -191,6 +223,20 @@ class SettingsRepository(private val context: Context) {
             prefs[Keys.SPEEDOMETER_DIGITAL_ONLY] = s.speedometerDigitalOnly
             prefs[Keys.GRADIENT_DIRECTION] = s.gradientDirection.name
             prefs[Keys.USE_CUSTOM_BG_COLOR] = s.useCustomBackgroundColor
+            prefs[Keys.SHOW_FUEL_LOG]      = s.showFuelLog
+            prefs[Keys.FUEL_LOG_JSON]      = gson.toJson(s.fuelLog)
+            prefs[Keys.SHOW_QUICK_TOGGLES] = s.showQuickToggles
+            prefs[Keys.THEME_ID]           = s.themeId
+            prefs[Keys.SHOW_LOCATION]      = s.showLocation
+            prefs[Keys.LOCATION_DETAIL_LEVEL] = s.locationDetailLevel.name
+            prefs[Keys.LOCATION_REFRESH_INTERVAL] = s.locationRefreshInterval.name
+            prefs[Keys.SHOW_WIND_SPEED]    = s.showWindSpeed
+            prefs[Keys.SHOW_FEELS_LIKE]    = s.showFeelsLike
+            prefs[Keys.SHOW_RAIN_CHANCE]   = s.showRainChance
+            prefs[Keys.SHOW_SUNRISE_SUNSET] = s.showSunriseSunset
+            prefs[Keys.SHOW_QUICK_TOGGLES_IN_CLOCK] = s.showQuickTogglesInClock
+            prefs[Keys.SHOW_NOW_PLAYING_SOURCE_BADGE] = s.showNowPlayingSourceBadge
+            prefs[Keys.USE_24_HOUR_FORMAT] = s.use24HourFormat
     }
 
     suspend fun resetToDefaults() {

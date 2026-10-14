@@ -9,6 +9,21 @@ enum class AppFont { SYSTEM, JETBRAINS_MONO, SOURCE_CODE_PRO }
 enum class DayNightMode { DARK, LIGHT, AUTO, SYSTEM }
 enum class SidebarPosition { LEFT, RIGHT, BOTTOM }
 enum class GradientDirection { TOP_TO_BOTTOM, LEFT_TO_RIGHT, DIAGONAL, RADIAL }
+// How granular the reverse-geocoded place name is. NEIGHBORHOOD is the finest
+// (e.g. "Boon Keng") — needed in dense cities where CITY/REGION both just
+// collapse to the city-state's own name (Singapore, Monaco, etc).
+enum class LocationDetailLevel { NEIGHBORHOOD, CITY, REGION }
+
+// How often the live place name (Weather + Location widgets) refreshes while
+// driving. Only affects the moving case — parked, refresh is bottlenecked by
+// a separate once-a-minute fallback ticker regardless of this setting, since
+// a stationary GPS provider doesn't emit new location updates at all.
+enum class LocationRefreshInterval(val millis: Long) {
+    SEC_30(30_000L),
+    MIN_1(60_000L),
+    MIN_2(120_000L),
+    MIN_5(300_000L)
+}
 
 enum class DefaultShortcutIcon {
     NONE,
@@ -39,6 +54,14 @@ fun defaultSoundboardPads() = listOf(
     SoundPadConfig("loud_fart",    synthType = "loud_fart"),
     SoundPadConfig("+",            synthType = ""),
     SoundPadConfig("+",            synthType = "")
+)
+
+data class FuelEntry(
+    val timestampMs: Long,
+    val odometerKm: Double,   // always stored in km; converted for display per unitSystem
+    val volume: Double,       // liters (metric entries) or gallons (imperial entries)
+    val cost: Double,
+    val isMetric: Boolean     // unit system in effect when this entry was logged
 )
 
 data class ShortcutConfig(
@@ -103,7 +126,28 @@ data class AppSettings(
     val vitalsAsBars: Boolean = false,
     val speedometerDigitalOnly: Boolean = false,
     val gradientDirection: GradientDirection = GradientDirection.DIAGONAL,
-    val useCustomBackgroundColor: Boolean = false
+    val useCustomBackgroundColor: Boolean = false,
+    val showFuelLog: Boolean = false,
+    val fuelLog: List<FuelEntry> = emptyList(),
+    val showQuickToggles: Boolean = false,
+    val showLocation: Boolean = false,
+    val locationDetailLevel: LocationDetailLevel = LocationDetailLevel.NEIGHBORHOOD,
+    val locationRefreshInterval: LocationRefreshInterval = LocationRefreshInterval.SEC_30,
+    // "custom" = fall back to the manually-picked accentColor/backgroundColor below;
+    // any DASHBOARD_THEMES id = use that preset's accent+surface for the current mode.
+    val themeId: String = "ignition",
+    // Weather panel enrichment — merged into the existing panel rather than
+    // adding new ones, each independently toggleable so the panel doesn't
+    // get crowded if the driver only wants some of them.
+    val showWindSpeed: Boolean = true,
+    val showFeelsLike: Boolean = true,
+    val showRainChance: Boolean = true,
+    // Clock panel enrichment
+    val showSunriseSunset: Boolean = true,
+    val showQuickTogglesInClock: Boolean = true,
+    // Now Playing panel enrichment
+    val showNowPlayingSourceBadge: Boolean = true,
+    val use24HourFormat: Boolean = true
 )
 
 fun defaultShortcuts() = listOf(
@@ -120,6 +164,24 @@ fun defaultWidgetLayout() = listOf(
     WidgetConfig("NOW_PLAYING", gridX = 0, gridY = 1, spanX = 2, spanY = 1)
 )
 
+/**
+ * Media-dominant "split panel" layout: a big Now Playing card fills the left
+ * two-thirds (album art, transport controls), Weather and Clock stack as
+ * glanceable info on the right — same cockpit feel as the closed-source
+ * Mini AA launcher, built from widgets OpenLauncher already has natively.
+ */
+fun splitPanelWidgetLayout() = listOf(
+    WidgetConfig("NOW_PLAYING", gridX = 0, gridY = 0, spanX = 2, spanY = 2),
+    WidgetConfig("WEATHER",     gridX = 2, gridY = 0, spanX = 1, spanY = 1),
+    WidgetConfig("CLOCK",       gridX = 2, gridY = 1, spanX = 1, spanY = 1)
+)
+
+/** Widget ids toggled by [AppSettings.showX] flags — used to sync those flags to a preset. */
+val PRESET_TOGGLEABLE_IDS = setOf(
+    "CLOCK", "WEATHER", "NOW_PLAYING", "TELEMETRY", "ALTIMETER",
+    "SPEEDOMETER", "VITALS", "TRIP_TRACKER", "SOUNDBOARD"
+)
+
 fun AppSettings.activeWidgetIds(): Set<String> = buildSet {
     if (showClock) add("CLOCK")
     if (showWeather) add("WEATHER")
@@ -130,6 +192,9 @@ fun AppSettings.activeWidgetIds(): Set<String> = buildSet {
     if (showVitals) add("VITALS")
     if (showTripTracker) add("TRIP_TRACKER")
     if (showSoundboard) add("SOUNDBOARD")
+    if (showFuelLog) add("FUEL_LOG")
+    if (showQuickToggles) add("QUICK_TOGGLES")
+    if (showLocation) add("LOCATION")
 }
 
 /**

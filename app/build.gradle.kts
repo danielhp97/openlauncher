@@ -13,8 +13,8 @@ android {
         applicationId  = "com.openlauncher.app"
         minSdk         = 21
         targetSdk      = 36
-        versionCode    = 6
-        versionName    = "0.0.5"
+        versionCode    = 20
+        versionName    = "1.0.0"
     }
 
     buildTypes {
@@ -37,6 +37,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -79,4 +80,8 @@ dependencies {
     implementation("com.google.code.gson:gson:2.13.1")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
+
+    // Unit tests — pure-logic functions only (src/test runs on the local JVM,
+    // no Android framework available without Robolectric/instrumentation)
+    testImplementation("junit:junit:4.13.2")
 }

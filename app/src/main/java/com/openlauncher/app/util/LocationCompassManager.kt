@@ -39,6 +39,13 @@ class LocationCompassManager(context: Context) {
     private var bearingSin   = 0f
     private var bearingCos   = 1f   // initial: pointing north
     private var lastLocationForBearing: Location? = null
+    // Both GPS and Network providers are registered at once (see start()), and
+    // Network fixes (cell/WiFi) can be hundreds of meters coarser than GPS —
+    // without gating, a coarse Network update stomps over a good GPS fix and
+    // the displayed position visibly jumps between neighbourhoods every time
+    // the two providers alternate. Track the best-accepted fix instead of
+    // blindly taking whichever callback fires most recently.
+    private var bestLocation: Location? = null
 
     private val sensorListener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent) {
@@ -68,6 +75,10 @@ class LocationCompassManager(context: Context) {
 
     private val locationListener = object : LocationListener {
         override fun onLocationChanged(loc: Location) {
+            val best = bestLocation
+            if (!isBetterLocation(loc.time, loc.accuracy, loc.provider, best?.time, best?.accuracy, best?.provider)) return
+            bestLocation = loc
+
             _location.value = LocationData(
                 latitude  = loc.latitude,
                 longitude = loc.longitude,
@@ -107,13 +118,24 @@ class LocationCompassManager(context: Context) {
     }
 
     fun start() {
-        // Sensors
-        sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.let {
-            sensorManager.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_UI)
-        }
-        sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)?.let {
-            sensorManager.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_UI)
-        }
+        // Sensors — unlike the location providers below, these had no
+        // exception handling at all. Confirmed on-device: the app was
+        // crashing hard on every APK version (even previously-working ones,
+        // even fresh installs) at the exact point onboarding hands off into
+        // the home screen, which is where this runs. Whatever's actually
+        // wrong with this unit's sensor/location stack isn't something app
+        // code can fix — this just stops it from taking the whole launcher
+        // down with it.
+        try {
+            sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.let {
+                sensorManager.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_UI)
+            }
+        } catch (_: Exception) {}
+        try {
+            sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)?.let {
+                sensorManager.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_UI)
+            }
+        } catch (_: Exception) {}
 
         // Location — Robust offline-first registration
         // GPS Provider (Works 100% offline, sat-based)
@@ -145,5 +167,6 @@ class LocationCompassManager(context: Context) {
         sensorManager.unregisterListener(sensorListener)
         locationManager.removeUpdates(locationListener)
         lastLocationForBearing = null
+        bestLocation = null
     }
 }

@@ -1,7 +1,12 @@
 package com.openlauncher.app.ui.widget
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.NightsStay
+import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -10,21 +15,31 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.openlauncher.app.data.ClockStyle
+import com.openlauncher.app.util.LocationData
+import com.openlauncher.app.util.SunriseSunset
 import kotlinx.coroutines.delay
 import java.util.*
 import kotlin.math.cos
 import kotlin.math.sin
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.icons.filled.Bluetooth
 
 @Composable
 fun ClockWidget(
     style: ClockStyle,
     accent: Color,
     isDayMode: Boolean = false,
+    location: LocationData? = null,
+    showSunriseSunset: Boolean = true,
+    showQuickToggles: Boolean = true,
+    isEditing: Boolean = false,
+    use24HourFormat: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     var calendar by remember { mutableStateOf(Calendar.getInstance()) }
@@ -41,33 +56,164 @@ fun ClockWidget(
 
     Box(modifier = modifier) {
         when (style) {
-            ClockStyle.DIGITAL -> DigitalClock(calendar, contentColor, subColor)
+            ClockStyle.DIGITAL -> DigitalClock(
+                cal = calendar, contentColor = contentColor, subColor = subColor, accent = accent,
+                location = location, showSunriseSunset = showSunriseSunset,
+                showQuickToggles = showQuickToggles, isDayMode = isDayMode, isEditing = isEditing,
+                use24HourFormat = use24HourFormat
+            )
             ClockStyle.ANALOG  -> AnalogClock(calendar, accent, isDayMode)
         }
     }
 }
 
 @Composable
-private fun DigitalClock(cal: Calendar, contentColor: Color, subColor: Color) {
+private fun DigitalClock(
+    cal: Calendar,
+    contentColor: Color,
+    subColor: Color,
+    accent: Color,
+    location: LocationData?,
+    showSunriseSunset: Boolean,
+    showQuickToggles: Boolean,
+    isDayMode: Boolean,
+    isEditing: Boolean,
+    use24HourFormat: Boolean
+) {
     val hour   = cal.get(Calendar.HOUR_OF_DAY)
     val minute = cal.get(Calendar.MINUTE)
+    val isDaylightHour = hour in 6..17
+    val timeText = if (use24HourFormat) {
+        "%02d:%02d".format(hour, minute)
+    } else {
+        val h12 = when (hour % 12) { 0 -> 12; else -> hour % 12 }
+        "%d:%02d %s".format(h12, minute, if (hour < 12) "AM" else "PM")
+    }
+
+    Row(modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp, vertical = 14.dp)) {
+        Column(
+            modifier            = Modifier.weight(1f).fillMaxHeight(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            // Icon sits directly beside the label (not SpaceBetween'd across the
+            // whole row) so it stays anchored to its text instead of drifting to
+            // the far edge on wider panels.
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment     = Alignment.CenterVertically
+            ) {
+                Text(
+                    text          = clockTimeLabel(cal),
+                    color         = subColor,
+                    fontSize      = 9.sp,
+                    fontWeight    = FontWeight.Bold,
+                    letterSpacing = 2.sp
+                )
+                Icon(
+                    imageVector        = if (isDaylightHour) Icons.Default.WbSunny else Icons.Default.NightsStay,
+                    contentDescription = null,
+                    tint               = accent.copy(alpha = 0.45f),
+                    modifier           = Modifier.size(14.dp)
+                )
+            }
+
+            // Bottom-anchored — sunrise/sunset (moved here from the Weather panel
+            // to keep that panel from getting crowded) sits directly above the
+            // time, which stays pinned to its original bottom-left spot.
+            Column(horizontalAlignment = Alignment.Start) {
+                if (showSunriseSunset && location != null) {
+                    val (riseMin, setMin) = remember(location.latitude, location.longitude) {
+                        SunriseSunset.localMinutes(location.latitude, location.longitude)
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(text = "🌅", fontSize = 11.sp) // 🌅 sunrise
+                        Text(text = "%02d:%02d".format(riseMin / 60, riseMin % 60), color = subColor, fontSize = 10.sp)
+                        Spacer(Modifier.width(6.dp))
+                        Text(text = "🌇", fontSize = 11.sp) // 🌇 sunset
+                        Text(text = "%02d:%02d".format(setMin / 60, setMin % 60), color = subColor, fontSize = 10.sp)
+                    }
+                    Spacer(Modifier.height(4.dp))
+                }
+                Text(
+                    text          = timeText,
+                    color         = contentColor,
+                    fontSize      = if (use24HourFormat) 44.sp else 36.sp,
+                    fontWeight    = FontWeight.Light,
+                    letterSpacing = 1.sp
+                )
+                Text(
+                    text     = buildDateString(cal),
+                    color    = subColor,
+                    fontSize = 12.sp
+                )
+            }
+        }
+
+        // Right rail — WiFi/Bluetooth stacked portrait-style in the panel's
+        // otherwise-empty right side. DND dropped: not something anyone
+        // actually reaches for on a car head unit.
+        if (showQuickToggles) {
+            Spacer(Modifier.width(10.dp))
+            CompactQuickToggles(
+                accent    = accent,
+                isDayMode = isDayMode,
+                isEditing = isEditing,
+                modifier  = Modifier.fillMaxHeight()
+            )
+        }
+    }
+}
+
+/**
+ * Icon-only WiFi/Bluetooth rail for the Clock panel's empty right side —
+ * a slimmer sibling of [QuickTogglesWidget] (which is padded for filling
+ * a whole standalone widget cell, not standing in a narrow column).
+ */
+@Composable
+private fun CompactQuickToggles(accent: Color, isDayMode: Boolean, isEditing: Boolean, modifier: Modifier = Modifier) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val wifiManager = remember { context.applicationContext.getSystemService(android.content.Context.WIFI_SERVICE) as? android.net.wifi.WifiManager }
+
+    var wifiOn by remember { mutableStateOf(wifiManager?.isWifiEnabled == true) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            wifiOn = wifiManager?.isWifiEnabled == true
+            delay(2000)
+        }
+    }
+
+    val inactiveTint = if (isDayMode) Color(0xFF999999) else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.35f)
 
     Column(
-        modifier            = Modifier.fillMaxSize().padding(start = 14.dp, bottom = 14.dp),
-        verticalArrangement = Arrangement.Bottom,
-        horizontalAlignment = Alignment.Start
+        modifier = modifier,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text          = "%02d:%02d".format(hour, minute),
-            color         = contentColor,
-            fontSize      = 48.sp,
-            fontWeight    = androidx.compose.ui.text.font.FontWeight.Light,
-            letterSpacing = 1.sp
+        Icon(
+            imageVector = Icons.Default.Wifi,
+            contentDescription = "WiFi",
+            tint = if (wifiOn) accent else inactiveTint,
+            modifier = Modifier
+                .size(18.dp)
+                .clickable(enabled = !isEditing) {
+                    runCatching {
+                        context.startActivity(android.content.Intent(android.provider.Settings.Panel.ACTION_WIFI).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
+                    }.onFailure {
+                        runCatching { context.startActivity(android.content.Intent(android.provider.Settings.ACTION_WIFI_SETTINGS).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                    }
+                }
         )
-        Text(
-            text     = buildDateString(cal),
-            color    = subColor,
-            fontSize = 12.sp
+        Spacer(Modifier.height(16.dp))
+        Icon(
+            imageVector = Icons.Default.Bluetooth,
+            contentDescription = "Bluetooth",
+            tint = inactiveTint,
+            modifier = Modifier
+                .size(18.dp)
+                .clickable(enabled = !isEditing) {
+                    runCatching { context.startActivity(android.content.Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                }
         )
     }
 }

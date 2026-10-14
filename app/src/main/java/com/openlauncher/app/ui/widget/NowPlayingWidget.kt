@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.drawable.toBitmap
 import com.openlauncher.app.model.NowPlayingState
 import com.openlauncher.app.service.MediaListenerService
 import kotlin.math.abs
@@ -68,7 +70,8 @@ fun NowPlayingWidget(
     onRadioCycleFm: () -> Unit = {},
     onRadioSwitchAm: () -> Unit = {},
     onRadioTune: (band: String, freq: Float) -> Unit = { _, _ -> },
-    onAssignRadio: () -> Unit = {}
+    onAssignRadio: () -> Unit = {},
+    showSourceBadge: Boolean = true
 ) {
     val context     = LocalContext.current
     val isConnected by MediaListenerService.isConnected.collectAsState()
@@ -134,6 +137,50 @@ fun NowPlayingWidget(
                 onTapToOpenApp = onTapToOpenApp,
                 modifier = Modifier.fillMaxSize()
             )
+        }
+
+        // 1b. SOURCE APP BADGE (Top-Left, below the "NOW PLAYING" label the
+        // parent HomeScreen draws at TopStart/padding(10,7)) — which app is
+        // playing, plus a Bluetooth glyph when audio is routed there. Useful
+        // mainly because different source apps behave differently (e.g. the
+        // hardware radio app drops playback when backgrounded).
+        if (showSourceBadge && hasContent && selectedSource != "FM/AM Radio") {
+            val sourcePackage = state?.controller?.packageName
+            if (!sourcePackage.isNullOrEmpty()) {
+                val appIcon = remember(sourcePackage) {
+                    runCatching { context.packageManager.getApplicationIcon(sourcePackage).toBitmap().asImageBitmap() }.getOrNull()
+                }
+                var isBluetoothRoute by remember { mutableStateOf(false) }
+                LaunchedEffect(Unit) {
+                    while (true) {
+                        isBluetoothRoute = isAudioRoutedToBluetooth(context)
+                        delay(2000)
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(start = 10.dp, top = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    if (appIcon != null) {
+                        Image(
+                            bitmap = appIcon,
+                            contentDescription = null,
+                            modifier = Modifier.size(40.dp).clip(RoundedCornerShape(9.dp))
+                        )
+                    }
+                    if (isBluetoothRoute) {
+                        Icon(
+                            imageVector = Icons.Default.Bluetooth,
+                            contentDescription = "Bluetooth audio",
+                            tint = (if (isDayMode) Color(0xFF3B7FD1) else accent).copy(alpha = 0.8f),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            }
         }
 
         // 2. FLOATING MULTI-SOURCE SELECTOR (Top-Right, always overlayed)
@@ -612,61 +659,55 @@ private fun StandardMinimalPlayer(
                 }
             }
 
-            // Draw Album Art as background with smooth blur overlay if present
+            // Album art as a contained thumbnail (Spotify's own treatment), not a
+            // full-bleed cropped background — that read as oversized/distracting
+            // next to how Spotify's own player actually presents Canvas art.
             val hasAlbumArt = nonNullState.albumArt != null
-            val useDarkTheme = hasAlbumArt || !isDayMode
-
-            val currentTextColor = if (hasAlbumArt) Color.White else if (isDayMode) Color(0xFF111111) else MaterialTheme.colorScheme.onBackground
-            val currentSubTextColor = if (hasAlbumArt) Color.White.copy(alpha = 0.6f) else if (isDayMode) Color(0xFF666666) else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-            val currentProgressColor = if (useDarkTheme) accent else if (isDayMode) Color(0xFF111111) else accent
+            val currentTextColor = if (isDayMode) Color(0xFF111111) else MaterialTheme.colorScheme.onBackground
+            val currentSubTextColor = if (isDayMode) Color(0xFF666666) else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+            val currentProgressColor = if (isDayMode) Color(0xFF111111) else accent
             val currentProgressTrack = currentTextColor.copy(alpha = 0.15f)
             val currentIconColor = currentTextColor.copy(alpha = 0.75f)
-            val currentPlayBgColor = if (useDarkTheme) accent.copy(alpha = 0.9f) else if (isDayMode) Color(0xFF111111) else accent.copy(alpha = 0.9f)
-            val currentPlayIconColor = if (useDarkTheme) Color.Black else Color.White
-
-            if (hasAlbumArt) {
-                // Prefer the full-resolution art URI when the source app provides
-                // one — the metadata bitmap is often a downscaled notification
-                // thumbnail that looks soft stretched across the widget. Falls back
-                // to the bitmap if the URI fails to load, and renders with high
-                // filter quality so upscaling stays smooth either way.
-                coil.compose.AsyncImage(
-                    model = nonNullState.artUri ?: nonNullState.albumArt,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    filterQuality = androidx.compose.ui.graphics.FilterQuality.High,
-                    error = nonNullState.albumArt?.let {
-                        androidx.compose.ui.graphics.painter.BitmapPainter(it.asImageBitmap())
-                    },
-                    modifier = Modifier.fillMaxSize()
-                )
-                // 25% dimming layer overlay
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.25f))
-                )
-            }
+            val currentPlayBgColor = if (isDayMode) Color(0xFF111111) else accent.copy(alpha = 0.9f)
+            val currentPlayIconColor = if (isDayMode) Color.White else Color.Black
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 14.dp, vertical = 10.dp),
-                verticalArrangement = Arrangement.SpaceBetween
+                    .padding(horizontal = 14.dp, vertical = 10.dp)
             ) {
-                // Track info (top — clickable to open app)
+                // Track info — bigger thumbnail, centered as the visual focus of the
+                // tile (not corner-tucked), but still bounded rather than full-bleed.
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
                     modifier = Modifier
-                        .padding(top = 16.dp)
+                        .weight(1f)
+                        .fillMaxWidth()
                         .let { if (!isEditing) it.clickable { onTapToOpenApp() } else it }
                 ) {
+                    if (hasAlbumArt) {
+                        coil.compose.AsyncImage(
+                            model = nonNullState.artUri ?: nonNullState.albumArt,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            filterQuality = androidx.compose.ui.graphics.FilterQuality.High,
+                            error = nonNullState.albumArt?.let {
+                                androidx.compose.ui.graphics.painter.BitmapPainter(it.asImageBitmap())
+                            },
+                            modifier = Modifier
+                                .size(180.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                        )
+                        Spacer(Modifier.height(10.dp))
+                    }
                     Text(
                         text = nonNullState.title,
                         style = MaterialTheme.typography.titleMedium,
                         color = currentTextColor,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                         fontSize = 14.sp
                     )
                     Text(
@@ -675,6 +716,7 @@ private fun StandardMinimalPlayer(
                         color = currentSubTextColor,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                         fontSize = 11.sp
                     )
                 }
@@ -734,5 +776,21 @@ private fun StandardMinimalPlayer(
 private fun formatMs(ms: Long): String {
     val s = ms / 1000
     return "%d:%02d".format(s / 60, s % 60)
+}
+
+// getDevices() reports audio routing only — no BLUETOOTH_CONNECT permission
+// needed (that's only required to read a device's *name*, which this skips).
+private fun isAudioRoutedToBluetooth(context: android.content.Context): Boolean {
+    if (android.os.Build.VERSION.SDK_INT < 23) return false
+    val am = context.getSystemService(android.content.Context.AUDIO_SERVICE) as? android.media.AudioManager ?: return false
+    return runCatching {
+        am.getDevices(android.media.AudioManager.GET_DEVICES_OUTPUTS).any { d ->
+            d.type == android.media.AudioDeviceInfo.TYPE_BLUETOOTH_A2DP ||
+                (android.os.Build.VERSION.SDK_INT >= 31 && (
+                    d.type == android.media.AudioDeviceInfo.TYPE_BLE_HEADSET ||
+                    d.type == android.media.AudioDeviceInfo.TYPE_BLE_SPEAKER
+                ))
+        }
+    }.getOrDefault(false)
 }
 
