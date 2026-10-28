@@ -33,6 +33,9 @@ import com.openlauncher.app.model.NavDestination
 import com.openlauncher.app.model.NowPlayingState
 import com.openlauncher.app.model.WeatherState
 import com.openlauncher.app.service.MediaListenerService
+import com.openlauncher.app.service.OdometerService
+import com.openlauncher.app.data.OdometerState
+import com.openlauncher.app.data.OdometerStore
 import com.openlauncher.app.util.LocationCompassManager
 import com.openlauncher.app.util.LocationData
 import kotlinx.coroutines.*
@@ -551,6 +554,21 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
 
     fun startLocationUpdates() = locationMgr.start()
     fun stopLocationUpdates()  = locationMgr.stop()
+
+    // ── Virtual odometer ──────────────────────────────────────────────────────
+    private val odometerStore = OdometerStore(application)
+
+    // The service's live total wins; the stored value covers the moments it isn't running.
+    val odometer: StateFlow<OdometerState> = combine(odometerStore.flow, OdometerService.liveMeters) { stored, live ->
+        if (live != null) stored.copy(odometerMeters = live) else stored
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), OdometerState())
+
+    fun resetTrip() {
+        viewModelScope.launch {
+            val current = OdometerService.liveMeters.value ?: odometerStore.load().odometerMeters
+            odometerStore.setTripStart(current)
+        }
+    }
 
     // ── Connectivity ──────────────────────────────────────────────────────────
     private val _isWifi = MutableStateFlow(false)

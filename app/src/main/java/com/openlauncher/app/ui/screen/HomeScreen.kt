@@ -122,6 +122,8 @@ fun HomeScreen(
     isWifi: Boolean,
     isData: Boolean,
     voltage: Float? = null,
+    odometer: com.openlauncher.app.data.OdometerState = com.openlauncher.app.data.OdometerState(),
+    onResetTrip: () -> Unit = {},
     isDayMode: Boolean = false,
     onPlayPause: () -> Unit,
     onNext: () -> Unit,
@@ -537,6 +539,8 @@ fun HomeScreen(
                         )
                         "TRIP_TRACKER" -> TripTrackerWidget(
                             location  = location,
+                            tripDistanceMeters = odometer.tripMeters,
+                            onResetTrip = onResetTrip,
                             isMetric  = settings.unitSystem == com.openlauncher.app.data.UnitSystem.METRIC,
                             accent    = accent,
                             isDayMode = isDayMode,
@@ -552,6 +556,7 @@ fun HomeScreen(
                         )
                         "FUEL_LOG" -> FuelLogWidget(
                             entries   = settings.fuelLog,
+                            currentOdometerKm = odometer.odometerMeters / 1000.0,
                             isMetric  = settings.unitSystem == com.openlauncher.app.data.UnitSystem.METRIC,
                             accent    = accent,
                             isDayMode = isDayMode,

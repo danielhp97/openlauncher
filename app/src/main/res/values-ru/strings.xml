@@ -382,4 +382,7 @@
     <string name="rst">СБР</string>
     <string name="ext">ВНЕШ</string>
     <string name="set">УСТАНОВИТЬ</string>
+    <string name="odometer_channel_name">Одометр</string>
+    <string name="odometer_notification_title">Одометр работает</string>
+    <string name="odometer_notification_text">Запись пройденного пути по GPS</string>
 </resources>

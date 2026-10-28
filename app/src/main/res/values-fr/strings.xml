@@ -384,4 +384,7 @@
     <string name="rst">RST</string>
     <string name="ext">EXT</string>
     <string name="set">RÉGLER</string>
+    <string name="odometer_channel_name">Odomètre</string>
+    <string name="odometer_notification_title">Odomètre actif</string>
+    <string name="odometer_notification_text">Enregistrement de la distance GPS</string>
 </resources>

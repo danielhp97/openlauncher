@@ -37,6 +37,7 @@ import com.openlauncher.app.ui.components.Sidebar
 import com.openlauncher.app.ui.screen.*
 import com.openlauncher.app.ui.theme.OpenLauncherTheme
 import com.openlauncher.app.viewmodel.LauncherViewModel
+import com.openlauncher.app.service.OdometerService
 
 class MainActivity : ComponentActivity() {
 
@@ -80,7 +81,25 @@ class MainActivity : ComponentActivity() {
         if (granted[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
             granted[Manifest.permission.ACCESS_COARSE_LOCATION] == true) {
             vm.startLocationUpdates()
+            OdometerService.start(this)
         }
+    }
+
+    // Android 13+: without this the odometer's foreground notification is hidden
+    // (the service still runs either way).
+    private val notificationPermission = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { }
+    private var notificationPermissionAsked = false
+
+    // Only once location is granted, so it never stacks on top of onboarding's location prompt.
+    private fun maybeRequestNotificationPermission() {
+        if (notificationPermissionAsked || android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) return
+        val pm = android.content.pm.PackageManager.PERMISSION_GRANTED
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != pm) return
+        if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == pm) return
+        notificationPermissionAsked = true
+        notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
     private fun hideSystemBars() {
@@ -125,6 +144,7 @@ class MainActivity : ComponentActivity() {
             val placeName   by vm.placeName.collectAsStateWithLifecycle()
             val voltage     by vm.voltage.collectAsStateWithLifecycle()
             val location    by vm.location.collectAsStateWithLifecycle()
+            val odometer    by vm.odometer.collectAsStateWithLifecycle()
             val bearing     by vm.compassBearing.collectAsStateWithLifecycle()
             val isWifi      by vm.isWifi.collectAsStateWithLifecycle()
             val isData      by vm.isData.collectAsStateWithLifecycle()
@@ -220,6 +240,7 @@ class MainActivity : ComponentActivity() {
                             vm.updateSettings { copy(onboardingCompleted = true) }
                             // Start location updates immediately upon completion
                             vm.startLocationUpdates()
+                            OdometerService.start(this@MainActivity)
                         }
                     )
                 } else {
@@ -295,6 +316,8 @@ class MainActivity : ComponentActivity() {
                                         location            = location,
                                         placeName           = placeName,
                                         voltage             = voltage,
+                                        odometer            = odometer,
+                                        onResetTrip         = { vm.resetTrip() },
                                         bearing             = bearing,
                                         isWifi              = isWifi,
                                         isData              = isData,
@@ -415,5 +438,8 @@ class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         vm.startLocationUpdates()
+        // Fallback for firmwares that don't deliver BOOT_COMPLETED: the launcher opens at boot anyway.
+        OdometerService.start(this)
+        maybeRequestNotificationPermission()
     }
 }

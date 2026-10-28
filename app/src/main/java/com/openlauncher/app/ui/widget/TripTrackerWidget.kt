@@ -30,6 +30,8 @@ import com.openlauncher.app.R
 @Composable
 fun TripTrackerWidget(
     location: LocationData?,
+    tripDistanceMeters: Double,
+    onResetTrip: () -> Unit,
     isMetric: Boolean,
     accent: Color,
     isDayMode: Boolean = false,
@@ -54,7 +56,8 @@ fun TripTrackerWidget(
     var idleTimeSeconds by rememberSaveable { mutableLongStateOf(0L) }
     var totalSpeedSum by rememberSaveable { mutableDoubleStateOf(0.0) }
     var movingSecondsCount by rememberSaveable { mutableLongStateOf(0L) }
-    var tripDistanceMeters by rememberSaveable { mutableDoubleStateOf(0.0) }
+    // Trip distance comes from the persistent virtual odometer (OdometerService),
+    // so it survives power-off and keeps counting while another app is in front.
 
     // The trip loop is keyed on isRunning only, so it must read location through
     // rememberUpdatedState — a plain parameter capture would freeze the GPS fix
@@ -140,21 +143,15 @@ fun TripTrackerWidget(
         }
     }
 
-    // Trip update loop
+    // Drive/idle timer loop (distance is no longer integrated here)
     LaunchedEffect(isRunning) {
-        var lastTickMs = android.os.SystemClock.elapsedRealtime()
         while (isRunning) {
             delay(1000)
-            val now = android.os.SystemClock.elapsedRealtime()
-            // Measure the real interval instead of assuming exactly 1 s per tick
-            val dtSeconds = ((now - lastTickMs) / 1000.0).coerceIn(0.0, 5.0)
-            lastTickMs = now
             val currentSpeed = currentLocation?.speedMps ?: 0f
             if (currentSpeed > 0.5f) {
                 driveTimeSeconds++
                 totalSpeedSum += currentSpeed
                 movingSecondsCount++
-                tripDistanceMeters += currentSpeed * dtSeconds
             } else {
                 idleTimeSeconds++
             }
@@ -530,7 +527,7 @@ fun TripTrackerWidget(
             val canReset = if (activeMode == "0-100") {
                 accelState == "COMPLETE" || bestAccelTime != null
             } else {
-                !isRunning && (driveTimeSeconds > 0 || idleTimeSeconds > 0)
+                !isRunning && (driveTimeSeconds > 0 || idleTimeSeconds > 0 || tripDistanceMeters > 0.0)
             }
             TeTactileButton(
                 label = stringResource(R.string.rst),
@@ -549,7 +546,7 @@ fun TripTrackerWidget(
                         idleTimeSeconds = 0L
                         totalSpeedSum = 0.0
                         movingSecondsCount = 0L
-                        tripDistanceMeters = 0.0
+                        onResetTrip()
                     }
                 },
                 isDayMode = isDayMode

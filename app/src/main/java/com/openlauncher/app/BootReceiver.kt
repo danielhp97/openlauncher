@@ -15,6 +15,8 @@ import android.content.Intent
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Intent.ACTION_BOOT_COMPLETED) return
+        // Start counting before (and independent of) whether the launcher wins foreground.
+        com.openlauncher.app.service.OdometerService.start(context)
         runCatching {
             context.startActivity(
                 Intent(context, MainActivity::class.java)

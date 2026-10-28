@@ -31,6 +31,7 @@ private const val KM_PER_MILE = 1.609344
 @Composable
 fun FuelLogWidget(
     entries: List<FuelEntry>,
+    currentOdometerKm: Double? = null,
     isMetric: Boolean,
     accent: Color,
     isDayMode: Boolean = false,
@@ -133,6 +134,7 @@ fun FuelLogWidget(
 
     if (showAddDialog) {
         AddFuelEntryDialog(
+            initialOdometer = currentOdometerKm?.let { if (isMetric) it else it / KM_PER_MILE },
             isMetric  = isMetric,
             accent    = accent,
             isDayMode = isDayMode,
@@ -148,13 +150,16 @@ fun FuelLogWidget(
 
 @Composable
 private fun AddFuelEntryDialog(
+    initialOdometer: Double?,
     isMetric: Boolean,
     accent: Color,
     isDayMode: Boolean,
     onDismiss: () -> Unit,
     onConfirm: (odometer: Double, volume: Double, cost: Double) -> Unit
 ) {
-    var odometerText by remember { mutableStateOf("") }
+    // Pre-filled from the virtual odometer; still editable. Locale.US keeps the '.'
+    // decimal separator that toDoubleOrNull() below expects.
+    var odometerText by remember { mutableStateOf(initialOdometer?.let { "%.1f".format(java.util.Locale.US, it) } ?: "") }
     var volumeText   by remember { mutableStateOf("") }
     var costText     by remember { mutableStateOf("") }
 
@@ -165,7 +170,7 @@ private fun AddFuelEntryDialog(
     val odometer = odometerText.toDoubleOrNull()
     val volume   = volumeText.toDoubleOrNull()
     val cost     = costText.toDoubleOrNull()
-    val valid    = odometer != null && odometer > 0 && volume != null && volume > 0 && cost != null && cost >= 0
+    val valid    = odometer != null && odometer >= 0 && volume != null && volume > 0 && cost != null && cost >= 0
 
     Dialog(onDismissRequest = onDismiss) {
         Column(

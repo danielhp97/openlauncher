@@ -37,6 +37,12 @@
          self-assertion to compete on equal footing. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- Virtual odometer foreground service (OdometerService). The _LOCATION
+         permission is only enforced on API 34+, harmless below. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <!-- Required on API 30+ so PackageManager returns ALL launcher apps -->
     <queries>
         <intent>
@@ -85,6 +91,12 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
+        <!-- GPS virtual odometer — keeps counting while other apps are in front -->
+        <service
+            android:name=".service.OdometerService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
 
         <!-- Notification listener service for MediaSession / Now Playing -->
         <service
