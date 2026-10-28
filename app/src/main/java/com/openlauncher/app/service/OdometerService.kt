@@ -27,6 +27,8 @@ import androidx.core.content.ContextCompat
 import com.openlauncher.app.MainActivity
 import com.openlauncher.app.R
 import com.openlauncher.app.data.OdometerStore
+import com.openlauncher.app.util.OdometerFilter
+import com.openlauncher.app.util.OdometerFix
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -50,10 +52,6 @@ class OdometerService : Service() {
         private const val NOTIFICATION_ID = 4201
 
         private const val FIX_INTERVAL_MS     = 1000L
-        private const val MAX_ACCURACY_M      = 25f
-        private const val MIN_SPEED_MPS       = 1.0f   // below this it's GPS jitter while parked
-        private const val MAX_SPEED_MPS       = 70.0f  // ~250 km/h — anything faster is a bad fix
-        private const val MAX_GAP_S           = 10.0   // tunnel / lost fix: don't bridge with a straight line
         private const val SAVE_EVERY_M        = 200.0
         private const val SAVE_EVERY_MS       = 30_000L
 
@@ -81,12 +79,17 @@ class OdometerService : Service() {
     private var meters = 0.0
     private var unsavedMeters = 0.0
     private var lastSaveMs = 0L
-    private var lastFix: Location? = null
+    // Android's ellipsoid distance on device; the filter defaults to haversine for JVM tests
+    private val filter = OdometerFilter(distanceM = { a, b ->
+        val out = FloatArray(1)
+        Location.distanceBetween(a.latitude, a.longitude, b.latitude, b.longitude, out)
+        out[0].toDouble()
+    })
 
     private val listener = object : LocationListener {
         override fun onLocationChanged(location: Location) = onFix(location)
         override fun onProviderEnabled(provider: String) {}
-        override fun onProviderDisabled(provider: String) { lastFix = null }
+        override fun onProviderDisabled(provider: String) { filter.reset() }
         @Deprecated("Deprecated in Java")
         override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
     }
@@ -157,28 +160,25 @@ class OdometerService : Service() {
 
     private fun onFix(fix: Location) {
         if (!loaded) return
-        if (!fix.hasAccuracy() || fix.accuracy > MAX_ACCURACY_M) return
+        val d = filter.accept(
+            OdometerFix(
+                timeSeconds = fixTimeSeconds(fix),
+                latitude    = fix.latitude,
+                longitude   = fix.longitude,
+                accuracyM   = if (fix.hasAccuracy()) fix.accuracy else null,
+                speedMps    = if (fix.hasSpeed()) fix.speed else null
+            )
+        )
+        if (d > 0.0) {
+            meters += d
+            unsavedMeters += d
+            _liveMeters.value = meters
+        }
 
-        val prev = lastFix
-        lastFix = fix
-        if (prev == null) return
-
-        val dt = fixTimeSeconds(fix) - fixTimeSeconds(prev)
-        if (dt <= 0.0) { lastFix = prev; return }   // duplicate / out-of-order fix
-        if (dt > MAX_GAP_S) return                  // gap: restart from this fix
-
-        val d = prev.distanceTo(fix).toDouble()
-        val impliedSpeed = d / dt
-        val speed = if (fix.hasSpeed()) fix.speed.toDouble() else impliedSpeed
-        if (speed < MIN_SPEED_MPS) return
-        if (impliedSpeed > MAX_SPEED_MPS) return
-
-        meters += d
-        unsavedMeters += d
-        _liveMeters.value = meters
-
+        // Checked on every fix, not just moving ones: the usual power cut comes after
+        // parking, and the tail of the ride must be flushed while standing still.
         val now = SystemClock.elapsedRealtime()
-        if (unsavedMeters >= SAVE_EVERY_M || now - lastSaveMs >= SAVE_EVERY_MS) {
+        if (unsavedMeters > 0.0 && (unsavedMeters >= SAVE_EVERY_M || now - lastSaveMs >= SAVE_EVERY_MS)) {
             unsavedMeters = 0.0
             lastSaveMs = now
             val snapshot = meters
