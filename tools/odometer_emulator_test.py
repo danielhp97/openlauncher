@@ -128,6 +128,25 @@ check("service starts after reboot", service_running(), "dumpsys after boot")
 after_boot = stored_meters()
 check("value survives reboot", after_boot >= after_kill - 0.01, f"{after_boot - base:.0f} m after reboot")
 
+# 4b. With "Allow all the time", the boot-started service counts before the launcher
+#     has ever been in front (e.g. going straight to CarPlay after power-on).
+bg = b"ACCESS_BACKGROUND_LOCATION: granted=true" in adb("shell", "dumpsys", "package", PKG)
+adb("shell", "am", "start", "-a", "android.settings.SETTINGS")
+time.sleep(2)
+geo(-1000.0)  # anchor
+time.sleep(1)
+ride(20, 20.0, -980.0)
+time.sleep(32)
+geo(-980.0 + 19 * 20.0)
+time.sleep(2)
+pre_launcher = stored_meters() - after_boot
+if bg:
+    check("counts after boot before the launcher opens", 380 <= pre_launcher <= 402,
+          f"+{pre_launcher:.0f} m (expected ~400, background location granted)")
+else:
+    print(f"INFO  background location not granted: +{pre_launcher:.0f} m before the launcher opened (expected 0)")
+after_boot += pre_launcher
+
 # 5. On the unit OpenLauncher is home and opens at boot, which gives the service
 #    while-in-use location. Emulate that, then ride with another app in front.
 adb("shell", "am", "start", "-n", f"{PKG}/.MainActivity")

@@ -82,24 +82,48 @@ class MainActivity : ComponentActivity() {
             granted[Manifest.permission.ACCESS_COARSE_LOCATION] == true) {
             vm.startLocationUpdates()
             OdometerService.start(this)
+            requestOdometerPermissions()
         }
     }
 
-    // Android 13+: without this the odometer's foreground notification is hidden
-    // (the service still runs either way).
+    // Odometer permissions, asked one after the other (never stacked on onboarding's
+    // location prompt, so only once foreground location is granted):
+    //  1. POST_NOTIFICATIONS (13+) — otherwise the service's notification is hidden.
+    //  2. ACCESS_BACKGROUND_LOCATION (10+) — a service started from BOOT_COMPLETED gets
+    //     no fixes until the launcher has been in front once without it. On 11+ this
+    //     opens the app's location settings, where the user picks "Allow all the time".
     private val notificationPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { }
+    ) { maybeRequestBackgroundLocation() }
+    private val backgroundLocationPermission = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted -> if (granted) OdometerService.start(this) }
     private var notificationPermissionAsked = false
+    private var backgroundLocationAsked = false
 
-    // Only once location is granted, so it never stacks on top of onboarding's location prompt.
-    private fun maybeRequestNotificationPermission() {
-        if (notificationPermissionAsked || android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) return
-        val pm = android.content.pm.PackageManager.PERMISSION_GRANTED
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != pm) return
-        if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == pm) return
-        notificationPermissionAsked = true
-        notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+    private fun hasPermission(permission: String) =
+        checkSelfPermission(permission) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+    private fun requestOdometerPermissions() {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.M) return
+        if (!hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)) return
+        if (!notificationPermissionAsked &&
+            android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
+            !hasPermission(Manifest.permission.POST_NOTIFICATIONS)
+        ) {
+            notificationPermissionAsked = true
+            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)  // chains on
+            return
+        }
+        maybeRequestBackgroundLocation()
+    }
+
+    private fun maybeRequestBackgroundLocation() {
+        if (backgroundLocationAsked || android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) return
+        if (!hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)) return
+        if (hasPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) return
+        backgroundLocationAsked = true
+        backgroundLocationPermission.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
     }
 
     private fun hideSystemBars() {
@@ -241,6 +265,7 @@ class MainActivity : ComponentActivity() {
                             // Start location updates immediately upon completion
                             vm.startLocationUpdates()
                             OdometerService.start(this@MainActivity)
+                            requestOdometerPermissions()
                         }
                     )
                 } else {
@@ -440,6 +465,6 @@ class MainActivity : ComponentActivity() {
         vm.startLocationUpdates()
         // Fallback for firmwares that don't deliver BOOT_COMPLETED: the launcher opens at boot anyway.
         OdometerService.start(this)
-        maybeRequestNotificationPermission()
+        requestOdometerPermissions()
     }
 }
