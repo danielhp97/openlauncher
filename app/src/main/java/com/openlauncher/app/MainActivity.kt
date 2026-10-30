@@ -102,7 +102,7 @@ class MainActivity : ComponentActivity() {
     private var backgroundLocationAsked = false
 
     private fun hasPermission(permission: String) =
-        checkSelfPermission(permission) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        androidx.core.content.ContextCompat.checkSelfPermission(this, permission) == android.content.pm.PackageManager.PERMISSION_GRANTED
 
     private fun requestOdometerPermissions() {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.M) return
@@ -399,6 +399,7 @@ class MainActivity : ComponentActivity() {
                                             com.openlauncher.app.viewmodel.LauncherViewModel.AppPickerTarget.ANDROID_AUTO -> stringResource(R.string.choose_android_auto_app)
                                             com.openlauncher.app.viewmodel.LauncherViewModel.AppPickerTarget.PIP          -> stringResource(R.string.choose_pip_app)
                                             com.openlauncher.app.viewmodel.LauncherViewModel.AppPickerTarget.RADIO        -> stringResource(R.string.choose_radio_app)
+                                            com.openlauncher.app.viewmodel.LauncherViewModel.AppPickerTarget.RIDE_SLOT    -> stringResource(R.string.choose_ride_app)
                                             else -> stringResource(R.string.choose_carplay_app)
                                         },
                                         accent              = accent,
@@ -417,7 +418,23 @@ class MainActivity : ComponentActivity() {
                             }
                         }
 
-                        if (isBottomBar) {
+                        val rideActive = settings.rideMode && nav == NavDestination.HOME && appPickerTarget == null
+                        if (rideActive) {
+                            RideScreen(
+                                settings       = settings,
+                                apps           = apps,
+                                location       = location,
+                                placeName      = placeName,
+                                odometer       = odometer,
+                                accent         = accent,
+                                isDayMode      = isDayMode,
+                                onLaunchApp    = { pkg -> vm.launchApp(pkg) },
+                                onPickApp      = { slot -> vm.startRideAppPicker(slot) },
+                                onResetTrip    = { vm.resetTrip() },
+                                onAddFuelEntry = { odo, vol, cost -> vm.addFuelEntry(odo, vol, cost) },
+                                onOpenLauncher = { vm.navigate(NavDestination.SETTINGS) }
+                            )
+                        } else if (isBottomBar) {
                             Column(modifier = Modifier.fillMaxSize()) {
                                 mainPane(Modifier.weight(1f).fillMaxWidth())
                                 androidx.compose.material3.HorizontalDivider(color = layoutDivColor)

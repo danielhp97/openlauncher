@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Open Launcher</string>
-    <string name="settings_label">Abrir ajustes de Open Launcher</string>
-    <string name="media_label">Abrir contenido multimedia de Open Launcher</string>
+    <string name="app_name">Africa Twin</string>
+    <string name="settings_label">Abrir ajustes de Africa Twin</string>
+    <string name="media_label">Abrir contenido multimedia de Africa Twin</string>
 
     <!-- General / Navigation -->
     <string name="settings_title">AJUSTES</string>
@@ -27,8 +27,8 @@
 
     <!-- Permissions -->
     <string name="perm_default_launcher">Establecer como launcher predeterminado</string>
-    <string name="perm_default_launcher_active">Activo: Open Launcher es la aplicación de inicio</string>
-    <string name="perm_default_launcher_sub">Necesario para que la unidad principal arranque con Open Launcher</string>
+    <string name="perm_default_launcher_active">Activo: Africa Twin es la aplicación de inicio</string>
+    <string name="perm_default_launcher_sub">Necesario para que la unidad principal arranque con Africa Twin</string>
     <string name="perm_notification_access">Acceso a notificaciones</string>
     <string name="perm_notification_granted">Concedido: controles multimedia activos</string>
     <string name="perm_notification_sub">Necesario para el widget «En reproducción»</string>
@@ -274,7 +274,7 @@
 
     <!-- Media Player / Radio Controls -->
     <string name="radio_no_source">NO HAY FUENTE DE RADIO</string>
-    <string name="radio_assign_sub">Abre la aplicación de radio de la unidad principal o asígnala abajo para que Open Launcher pueda reflejarla y controlarla</string>
+    <string name="radio_assign_sub">Abre la aplicación de radio de la unidad principal o asígnala abajo para que Africa Twin pueda reflejarla y controlarla</string>
     <string name="radio_assign_app">ASIGNAR APLICACIÓN DE RADIO</string>
     <string name="radio_seek_left">◄ BUSCAR</string>
     <string name="radio_open">ABRIR</string>
@@ -385,6 +385,22 @@
     <string name="odometer_channel_name">Odómetro</string>
     <string name="odometer_notification_title">Odómetro activo</string>
     <string name="odometer_notification_text">Registrando distancia GPS</string>
+    <string name="ride_no_gps">Sin GPS</string>
+    <string name="ride_hold_to_reset">Mantén para reiniciar</string>
+    <string name="ride_fuel">COMBUSTIBLE</string>
+    <string name="ride_since_fillup">%1$s desde el repostaje</string>
+    <string name="ride_no_fillups">Sin repostajes</string>
+    <string name="ride_reset_trip_title">¿Reiniciar el parcial?</string>
+    <string name="ride_reset_trip_message">Pone el parcial a 0. El odómetro conserva el total.</string>
+    <string name="ride_choose_app">Mantén para elegir</string>
+    <string name="choose_ride_app">ELIGE APP PARA ESTE MOSAICO</string>
+    <string name="ride_screen">Pantalla de ruta</string>
+    <string name="ride_screen_desc">Inicio sencillo: velocidad, parcial, combustible y cuatro apps. Mantén pulsado el reloj para volver aquí.</string>
+    <string name="bike_logo">Logo / gráfico</string>
+    <string name="bike_logo_sub">El logo o gráfico del depósito de tu moto, en el panel</string>
+    <string name="bike_logo_set">Logo visible en el panel y aquí</string>
+    <string name="bike_logo_choose">Elegir imagen</string>
+    <string name="bike_logo_remove">Quitar</string>
 </resources>
 
 

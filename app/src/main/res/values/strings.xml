@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Open Launcher</string>
-    <string name="settings_label">Open Launcher Settings</string>
-    <string name="media_label">Open Launcher Media</string>
+    <string name="app_name">Africa Twin</string>
+    <string name="settings_label">Africa Twin Settings</string>
+    <string name="media_label">Africa Twin Media</string>
 
     <!-- General / Navigation -->
     <string name="settings_title">SETTINGS</string>
@@ -16,7 +16,7 @@
 
     <!-- Settings Sections -->
     <string name="settings_section_permissions">Permissions</string>
-    <string name="settings_section_vehicle">Vehicle</string>
+    <string name="settings_section_vehicle">Motorcycle</string>
     <string name="settings_section_sidebar">Sidebar</string>
     <string name="settings_section_appearance">Appearance</string>
     <string name="settings_section_typography">Typography</string>
@@ -26,9 +26,9 @@
     <string name="settings_section_maintenance">Maintenance</string>
 
     <!-- Permissions -->
-    <string name="perm_default_launcher">Set as Default Launcher</string>
-    <string name="perm_default_launcher_active">Active — Open Launcher is the home app</string>
-    <string name="perm_default_launcher_sub">Required so the head unit boots into Open Launcher</string>
+    <string name="perm_default_launcher">Set as Home Screen</string>
+    <string name="perm_default_launcher_active">Active — the Africa Twin dash is the home screen</string>
+    <string name="perm_default_launcher_sub">Required so the unit boots straight into the Africa Twin dash</string>
     <string name="perm_notification_access">Notification Access</string>
     <string name="perm_notification_granted">Granted — media controls active</string>
     <string name="perm_notification_sub">Required for Now Playing widget</string>
@@ -40,7 +40,7 @@
     <string name="perm_location_sub">Required for compass, speed &amp; weather</string>
 
     <!-- Vehicle -->
-    <string name="vehicle_name">Vehicle Name</string>
+    <string name="vehicle_name">Bike name</string>
     <string name="sidebar_position">Sidebar Position</string>
     <string name="sidebar_left">Left side</string>
     <string name="sidebar_right">Right side</string>
@@ -105,7 +105,7 @@
 
     <!-- Language Section -->
     <string name="language_label">Language</string>
-    <string name="language_sublabel">Select launcher language (Device language by default)</string>
+    <string name="language_sublabel">Select language (device language by default)</string>
     <string name="lang_system">System</string>
 
     <!-- Typography -->
@@ -127,7 +127,7 @@
     <string name="magnetometer_active">Sweep active: Drive slowly in two 360° circles… (%1$ds remaining)</string>
     <string name="magnetometer_complete">Sweep complete — check the compass widget; if heading is still off, use the manual offset below</string>
     <string name="compass_offset_label">Compass Heading Offset</string>
-    <string name="compass_offset_sub">Manual Alignment: %1$s%2$d° — aligns compass with vehicle front</string>
+    <string name="compass_offset_sub">Manual Alignment: %1$s%2$d° — aligns the compass with the front of the bike</string>
 
     <!-- Updates & Maintenance -->
     <string name="check_updates">Check for Updates</string>
@@ -181,7 +181,7 @@
     <string name="widget_speedometer">SPEED</string>
     <string name="desc_speedometer">GPS speed</string>
     <string name="widget_vitals">VITALS</string>
-    <string name="desc_vitals">Head Unit Health / Vitals</string>
+    <string name="desc_vitals">Unit health / vitals</string>
     <string name="widget_trip_tracker">TRIP TRACKER</string>
     <string name="desc_trip_tracker">Trip logs &amp; stats</string>
     <string name="widget_soundboard">SOUNDBOARD</string>
@@ -274,7 +274,7 @@
 
     <!-- Media Player / Radio Controls -->
     <string name="radio_no_source">NO RADIO SOURCE</string>
-    <string name="radio_assign_sub">Start your head unit\'s radio app — or assign it below so Open Launcher can mirror and control it</string>
+    <string name="radio_assign_sub">Start the unit\'s radio app — or assign it below so the dash can mirror and control it</string>
     <string name="radio_assign_app">ASSIGN RADIO APP</string>
     <string name="radio_seek_left">◄ SEEK</string>
     <string name="radio_open">OPEN</string>
@@ -385,4 +385,20 @@
     <string name="odometer_channel_name">Odometer</string>
     <string name="odometer_notification_title">Odometer running</string>
     <string name="odometer_notification_text">Recording GPS distance</string>
+    <string name="ride_no_gps">No GPS</string>
+    <string name="ride_hold_to_reset">Hold to reset</string>
+    <string name="ride_fuel">FUEL</string>
+    <string name="ride_since_fillup">%1$s since fill-up</string>
+    <string name="ride_no_fillups">No fill-ups logged</string>
+    <string name="ride_reset_trip_title">Reset trip?</string>
+    <string name="ride_reset_trip_message">Set the trip meter back to 0. The odometer keeps its total.</string>
+    <string name="ride_choose_app">Hold to choose</string>
+    <string name="choose_ride_app">CHOOSE APP FOR THIS TILE</string>
+    <string name="ride_screen">Ride screen</string>
+    <string name="ride_screen_desc">Speedo, trip, odometer, fuel and four app tiles. Long-press the clock to get back here.</string>
+    <string name="bike_logo">Logo / artwork</string>
+    <string name="bike_logo_sub">Your bike logo or tank artwork, shown on the dash</string>
+    <string name="bike_logo_set">Logo shown on the dash and here</string>
+    <string name="bike_logo_choose">Choose image</string>
+    <string name="bike_logo_remove">Remove</string>
 </resources>

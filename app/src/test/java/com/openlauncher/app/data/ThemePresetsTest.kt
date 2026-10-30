@@ -9,17 +9,17 @@ class ThemePresetsTest {
 
     @Test
     fun `night mode resolves the theme's dark accent, background, and ink`() {
-        val resolved = resolveDashboardTheme("instrument", isDayMode = false)
-        assertEquals(Color(0xFFFFA23DL), resolved?.accent)
-        assertEquals(Color(0xFF14100AL), resolved?.background)
-        assertEquals(Color(0xFFF3ECDDL), resolved?.ink)
+        val resolved = resolveDashboardTheme(BIKE_THEME_ID, isDayMode = false)
+        assertEquals(Color(0xFFFF4136L), resolved?.accent)
+        assertEquals(Color(0xFF0C0D10L), resolved?.background)
+        assertEquals(Color(0xFFF2F0EAL), resolved?.ink)
     }
 
     @Test
     fun `day mode resolves the theme's light accent and background, with no ink override`() {
-        val resolved = resolveDashboardTheme("instrument", isDayMode = true)
-        assertEquals(Color(0xFF1F2A44L), resolved?.accent)
-        assertEquals(Color(0xFFF0E6D2L), resolved?.background)
+        val resolved = resolveDashboardTheme(BIKE_THEME_ID, isDayMode = true)
+        assertEquals(Color(0xFFB3141CL), resolved?.accent)
+        assertEquals(Color(0xFFF4F2ECL), resolved?.background)
         assertNull(resolved?.ink)
     }
 

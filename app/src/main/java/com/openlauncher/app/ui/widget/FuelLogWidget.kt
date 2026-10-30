@@ -26,7 +26,7 @@ import com.openlauncher.app.data.FuelEntry
 import androidx.compose.ui.res.stringResource
 import com.openlauncher.app.R
 
-private const val KM_PER_MILE = 1.609344
+internal const val KM_PER_MILE = 1.609344
 
 @Composable
 fun FuelLogWidget(
@@ -149,7 +149,7 @@ fun FuelLogWidget(
 }
 
 @Composable
-private fun AddFuelEntryDialog(
+internal fun AddFuelEntryDialog(
     initialOdometer: Double?,
     isMetric: Boolean,
     accent: Color,

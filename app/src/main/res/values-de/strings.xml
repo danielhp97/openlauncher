@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Open Launcher</string>
-    <string name="settings_label">Einstellungen von Open Launcher</string>
-    <string name="media_label">Medien von Open Launcher</string>
+    <string name="app_name">Africa Twin</string>
+    <string name="settings_label">Einstellungen von Africa Twin</string>
+    <string name="media_label">Medien von Africa Twin</string>
 
     <!-- General / Navigation -->
     <string name="settings_title">EINSTELLUNGEN</string>
@@ -27,8 +27,8 @@
 
     <!-- Permissions -->
     <string name="perm_default_launcher">Als Standard-Launcher festlegen</string>
-    <string name="perm_default_launcher_active">Aktiv — Open Launcher ist die Start-App</string>
-    <string name="perm_default_launcher_sub">Erforderlich, damit das Gerät mit Open Launcher startet</string>
+    <string name="perm_default_launcher_active">Aktiv — Africa Twin ist die Start-App</string>
+    <string name="perm_default_launcher_sub">Erforderlich, damit das Gerät mit Africa Twin startet</string>
     <string name="perm_notification_access">Benachrichtigungszugriff</string>
     <string name="perm_notification_granted">Erteilt — Mediensteuerung aktiv</string>
     <string name="perm_notification_sub">Erforderlich für das „Wiedergabe“-Widget</string>
@@ -274,7 +274,7 @@
 
     <!-- Media Player / Radio Controls -->
     <string name="radio_no_source">KEINE RADIOQUELLE</string>
-    <string name="radio_assign_sub">Starte die Radio-App deines Autoradios — oder weise sie unten zu, damit Open Launcher sie anzeigen und steuern kann</string>
+    <string name="radio_assign_sub">Starte die Radio-App deines Autoradios — oder weise sie unten zu, damit Africa Twin sie anzeigen und steuern kann</string>
     <string name="radio_assign_app">RADIO-APP ZUWEISEN</string>
     <string name="radio_seek_left">◄ SUCHEN</string>
     <string name="radio_open">ÖFFNEN</string>
@@ -385,5 +385,21 @@
     <string name="odometer_channel_name">Kilometerzähler</string>
     <string name="odometer_notification_title">Kilometerzähler aktiv</string>
     <string name="odometer_notification_text">GPS-Strecke wird aufgezeichnet</string>
+    <string name="ride_no_gps">Kein GPS</string>
+    <string name="ride_hold_to_reset">Halten zum Zurücksetzen</string>
+    <string name="ride_fuel">KRAFTSTOFF</string>
+    <string name="ride_since_fillup">%1$s seit dem Tanken</string>
+    <string name="ride_no_fillups">Keine Tankvorgänge</string>
+    <string name="ride_reset_trip_title">Tageskilometer zurücksetzen?</string>
+    <string name="ride_reset_trip_message">Setzt den Tageskilometerzähler auf 0. Der Gesamtstand bleibt erhalten.</string>
+    <string name="ride_choose_app">Halten zum Auswählen</string>
+    <string name="choose_ride_app">APP FÜR DIESE KACHEL WÄHLEN</string>
+    <string name="ride_screen">Fahrbildschirm</string>
+    <string name="ride_screen_desc">Einfacher Startbildschirm: Tempo, Strecke, Kraftstoff und vier App-Kacheln. Uhr lange drücken, um hierher zurückzukehren.</string>
+    <string name="bike_logo">Logo / Grafik</string>
+    <string name="bike_logo_sub">Logo oder Tankgrafik deines Motorrads, auf dem Dash angezeigt</string>
+    <string name="bike_logo_set">Logo wird auf dem Dash und hier angezeigt</string>
+    <string name="bike_logo_choose">Bild wählen</string>
+    <string name="bike_logo_remove">Entfernen</string>
 </resources>
 

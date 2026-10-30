@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Open Launcher</string>
-    <string name="settings_label">Paramètres d’Open Launcher</string>
-    <string name="media_label">Médias d’Open Launcher</string>
+    <string name="app_name">Africa Twin</string>
+    <string name="settings_label">Paramètres d’Africa Twin</string>
+    <string name="media_label">Médias d’Africa Twin</string>
 
     <!-- General / Navigation -->
     <string name="settings_title">PARAMÈTRES</string>
@@ -27,8 +27,8 @@
 
     <!-- Permissions -->
     <string name="perm_default_launcher">Définir comme lanceur par défaut</string>
-    <string name="perm_default_launcher_active">Actif — Open Launcher est l’application d’accueil</string>
-    <string name="perm_default_launcher_sub">Nécessaire pour que l’autoradio démarre sur Open Launcher</string>
+    <string name="perm_default_launcher_active">Actif — Africa Twin est l’application d’accueil</string>
+    <string name="perm_default_launcher_sub">Nécessaire pour que l’autoradio démarre sur Africa Twin</string>
     <string name="perm_notification_access">Accès aux notifications</string>
     <string name="perm_notification_granted">Autorisé — commandes multimédias actives</string>
     <string name="perm_notification_sub">Nécessaire pour le widget « En lecture »</string>
@@ -276,7 +276,7 @@
 
     <!-- Media Player / Radio Controls -->
     <string name="radio_no_source">AUCUNE SOURCE RADIO</string>
-    <string name="radio_assign_sub">Start your head unit\'s radio app — or assign it below so Open Launcher can mirror and control it</string>
+    <string name="radio_assign_sub">Start your head unit\'s radio app — or assign it below so Africa Twin can mirror and control it</string>
     <string name="radio_assign_app">ASSIGNER L’APPLICATION RADIO</string>
     <string name="radio_seek_left">◄ RECHERCHE</string>
     <string name="radio_open">OUVRIR</string>
@@ -387,4 +387,20 @@
     <string name="odometer_channel_name">Odomètre</string>
     <string name="odometer_notification_title">Odomètre actif</string>
     <string name="odometer_notification_text">Enregistrement de la distance GPS</string>
+    <string name="ride_no_gps">Pas de GPS</string>
+    <string name="ride_hold_to_reset">Maintenir pour remettre à zéro</string>
+    <string name="ride_fuel">CARBURANT</string>
+    <string name="ride_since_fillup">%1$s depuis le plein</string>
+    <string name="ride_no_fillups">Aucun plein enregistré</string>
+    <string name="ride_reset_trip_title">Remettre le trajet à zéro ?</string>
+    <string name="ride_reset_trip_message">Remet le compteur journalier à 0. L’odomètre garde le total.</string>
+    <string name="ride_choose_app">Maintenir pour choisir</string>
+    <string name="choose_ride_app">CHOISIR L’APP DE CETTE TUILE</string>
+    <string name="ride_screen">Écran de route</string>
+    <string name="ride_screen_desc">Accueil simple : vitesse, trajet, carburant et quatre apps. Appui long sur l’horloge pour revenir ici.</string>
+    <string name="bike_logo">Logo / graphisme</string>
+    <string name="bike_logo_sub">Le logo ou le graphisme de réservoir de ta moto, affiché sur le tableau de bord</string>
+    <string name="bike_logo_set">Logo affiché sur le tableau de bord et ici</string>
+    <string name="bike_logo_choose">Choisir une image</string>
+    <string name="bike_logo_remove">Retirer</string>
 </resources>

@@ -82,6 +82,20 @@ fun SettingsScreen(
         }
     }
 
+    // Owner's bike logo / tank artwork — same persistable-grant approach as the wallpaper
+    val logoPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        uri?.let {
+            runCatching {
+                context.contentResolver.takePersistableUriPermission(
+                    it, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
+            onUpdate { copy(logoUri = it.toString()) }
+        }
+    }
+
     val isDayMode = LocalDayMode.current
     val screenBg  = MaterialTheme.colorScheme.background
 
@@ -97,16 +111,48 @@ fun SettingsScreen(
             .padding(horizontal = 24.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // ── Title ────────────────────────────────────────────────────────────
-        Text(
-            text          = stringResource(R.string.settings_title),
-            style         = MaterialTheme.typography.titleLarge,
-            color         = if (isDayMode) Color(0xFF111111) else accent,
-            letterSpacing = 3.sp,
-            fontSize      = 14.sp
-        )
+        // ── Title: the bike, then "Settings" ─────────────────────────────────
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            if (settings.logoUri.isNotEmpty()) {
+                coil.compose.AsyncImage(
+                    model = Uri.parse(settings.logoUri),
+                    contentDescription = null,
+                    modifier = Modifier.height(36.dp).widthIn(max = 140.dp)
+                )
+            } else {
+                Icon(Icons.Default.TwoWheeler, null, tint = accent, modifier = Modifier.size(32.dp))
+            }
+            Column {
+                Text(
+                    text          = settings.vehicleName.uppercase() + " · XRV750 · 1991",
+                    color         = if (isDayMode) Color(0xFF111111) else MaterialTheme.colorScheme.onBackground,
+                    fontWeight    = androidx.compose.ui.text.font.FontWeight.Bold,
+                    letterSpacing = 2.sp,
+                    fontSize      = 16.sp
+                )
+                Text(
+                    text          = stringResource(R.string.settings_title),
+                    color         = if (isDayMode) Color(0xFF111111) else accent,
+                    letterSpacing = 3.sp,
+                    fontSize      = 11.sp
+                )
+            }
+        }
 
         Spacer(Modifier.height(4.dp))
+
+        // ── Ride screen ──────────────────────────────────────────────────────
+        SettingsSection(stringResource(R.string.ride_screen)) {
+            SettingsRow(
+                label    = stringResource(R.string.ride_screen),
+                sublabel = stringResource(R.string.ride_screen_desc),
+                icon     = Icons.Default.TwoWheeler
+            ) {
+                Switch(checked = settings.rideMode,
+                    onCheckedChange = { onUpdate { copy(rideMode = it) } },
+                    colors = switchColors(accent))
+            }
+        }
 
         // ── Permissions ──────────────────────────────────────────────────────
         SettingsSection(stringResource(R.string.settings_section_permissions)) {
@@ -253,13 +299,13 @@ fun SettingsScreen(
             SettingsRow(
                 label    = stringResource(R.string.vehicle_name),
                 sublabel = "",
-                icon     = Icons.Default.DirectionsCar
+                icon     = Icons.Default.TwoWheeler
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     OutlinedTextField(
                         value         = nameInput,
                         onValueChange = { nameInput = it },
-                        placeholder   = { Text("MY CAR", color = if (isDayMode) Color(0xFF999999) else Color(0xFF444444), fontSize = 12.sp) },
+                        placeholder   = { Text("AFRICA TWIN", color = if (isDayMode) Color(0xFF999999) else Color(0xFF444444), fontSize = 12.sp) },
                         singleLine    = true,
                         textStyle     = LocalTextStyle.current.copy(fontSize = 12.sp, color = if (isDayMode) Color(0xFF111111) else Color.White),
                         colors        = outlinedFieldColors(accent),
@@ -269,6 +315,30 @@ fun SettingsScreen(
                         IconButton(onClick = { onUpdate { copy(vehicleName = nameInput) } }, modifier = Modifier.size(32.dp)) {
                             Icon(Icons.Default.Check, stringResource(R.string.save), tint = accent, modifier = Modifier.size(16.dp))
                         }
+                    }
+                }
+            }
+
+            SettingsDivider()
+
+            SettingsRow(
+                label    = stringResource(R.string.bike_logo),
+                sublabel = if (settings.logoUri.isNotEmpty()) stringResource(R.string.bike_logo_set) else stringResource(R.string.bike_logo_sub),
+                icon     = Icons.Default.Image
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (settings.logoUri.isNotEmpty()) {
+                        coil.compose.AsyncImage(
+                            model = Uri.parse(settings.logoUri),
+                            contentDescription = null,
+                            modifier = Modifier.height(32.dp).widthIn(max = 96.dp)
+                        )
+                        TextButton(onClick = { onUpdate { copy(logoUri = "") } }) {
+                            Text(stringResource(R.string.bike_logo_remove), color = Color(0xFF993333), fontSize = 10.sp)
+                        }
+                    }
+                    TextButton(onClick = { logoPicker.launch(arrayOf("image/*")) }) {
+                        Text(stringResource(R.string.bike_logo_choose), color = accent, fontSize = 10.sp)
                     }
                 }
             }
@@ -429,12 +499,6 @@ fun SettingsScreen(
 
         // ── Appearance ───────────────────────────────────────────────────────
         SettingsSection(stringResource(R.string.settings_section_appearance)) {
-            // Dashboard Theme — a preset owns both accent and surface tint together;
-            // Accent Color / Background below only apply once this is set to Custom.
-            DashboardThemeRow(settings = settings, onUpdate = onUpdate)
-
-            SettingsDivider()
-
             // Display Mode
             SettingsRow(
                 label    = stringResource(R.string.display_mode),
@@ -477,179 +541,6 @@ fun SettingsScreen(
                 }
             }
 
-            SettingsDivider()
-
-            // Accent color
-            SettingsRow(
-                label    = stringResource(R.string.accent_color),
-                sublabel = stringResource(R.string.accent_color_sub),
-                icon     = Icons.Default.Palette
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .border(1.dp, Color(0xFF999999), RoundedCornerShape(4.dp))
-                        .background(Color(settings.accentColor))
-                        .clickable { showAccentPicker = true }
-                )
-            }
-
-            SettingsDivider()
-
-            // Background color + gradient
-            SettingsRow(
-                label    = stringResource(R.string.bg_color),
-                sublabel = if (settings.useGradient) stringResource(R.string.bg_gradient) else stringResource(R.string.bg_solid),
-                icon     = Icons.Default.FormatColorFill
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment     = Alignment.CenterVertically
-                ) {
-                    // Start color swatch
-                    Box(
-                        modifier = Modifier
-                            .size(28.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                            .border(1.dp, Color(0xFF999999), RoundedCornerShape(4.dp))
-                            .background(Color(settings.backgroundColor))
-                            .clickable { showBgPicker = true }
-                    )
-                    if (settings.useGradient) {
-                        androidx.compose.material3.Icon(
-                            Icons.Default.ArrowForward, null,
-                            tint = if (isDayMode) Color(0xFF999999) else Color(0xFF555555), modifier = Modifier.size(14.dp)
-                        )
-                        // End color swatch
-                        Box(
-                            modifier = Modifier
-                                .size(28.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .border(1.dp, Color(0xFF999999), RoundedCornerShape(4.dp))
-                                .background(Color(settings.gradientEndColor))
-                                .clickable { showGradientEndPicker = true }
-                        )
-                    }
-                    if (settings.useCustomBackgroundColor) {
-                        TextButton(
-                            onClick = {
-                                onUpdate {
-                                    copy(
-                                        useCustomBackgroundColor = false,
-                                        backgroundColor = Color.Black.toArgb(),
-                                        useGradient = false
-                                    )
-                                }
-                            },
-                            contentPadding = PaddingValues(horizontal = 6.dp),
-                            modifier = Modifier.height(28.dp)
-                        ) {
-                            Text(stringResource(R.string.bg_default), color = accent, fontSize = 9.sp, letterSpacing = 1.sp)
-                        }
-                    }
-                }
-            }
-
-            SettingsDivider()
-
-            // Font Color row
-            SettingsRow(
-                label    = stringResource(R.string.font_color),
-                sublabel = stringResource(R.string.font_color_sub),
-                icon     = Icons.Default.FormatSize
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .border(1.dp, Color(0xFF999999), RoundedCornerShape(4.dp))
-                        .background(Color(settings.fontColor))
-                        .clickable { showFontColorPicker = true }
-                )
-            }
-
-            SettingsDivider()
-
-            SettingsRow(label = stringResource(R.string.use_gradient), sublabel = stringResource(R.string.use_gradient_sub), icon = Icons.Default.Gradient) {
-                Switch(checked = settings.useGradient,
-                    onCheckedChange = { onUpdate { copy(useGradient = it) } },
-                    colors = switchColors(accent))
-            }
-
-            if (settings.useGradient) {
-                SettingsDivider()
-                SettingsRow(
-                    label    = stringResource(R.string.gradient_direction),
-                    sublabel = when (settings.gradientDirection) {
-                        GradientDirection.TOP_TO_BOTTOM -> stringResource(R.string.grad_top_bottom)
-                        GradientDirection.LEFT_TO_RIGHT -> stringResource(R.string.grad_left_right)
-                        GradientDirection.DIAGONAL      -> stringResource(R.string.grad_diagonal)
-                        GradientDirection.RADIAL        -> stringResource(R.string.grad_radial)
-                    },
-                    icon     = Icons.Default.TrendingFlat
-                ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        GradientDirection.entries.forEach { dir ->
-                            FilterChip(
-                                selected = settings.gradientDirection == dir,
-                                onClick  = { onUpdate { copy(gradientDirection = dir) } },
-                                label    = {
-                                    Text(
-                                        text      = when (dir) {
-                                            GradientDirection.TOP_TO_BOTTOM -> stringResource(R.string.dir_vertical)
-                                            GradientDirection.LEFT_TO_RIGHT -> stringResource(R.string.dir_horizontal)
-                                            GradientDirection.DIAGONAL      -> stringResource(R.string.dir_diagonal)
-                                            GradientDirection.RADIAL        -> stringResource(R.string.dir_radial)
-                                        },
-                                        fontSize  = 9.sp,
-                                        letterSpacing = 0.5.sp
-                                    )
-                                },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = accent,
-                                    selectedLabelColor     = Color.Black
-                                )
-                            )
-                        }
-                    }
-                }
-            }
-
-            SettingsDivider()
-
-            // Wallpaper
-            SettingsButton(
-                label    = stringResource(R.string.set_wallpaper),
-                sublabel = if (settings.wallpaperUri.isNotEmpty()) stringResource(R.string.wallpaper_active) else stringResource(R.string.wallpaper_choose),
-                icon     = Icons.Default.Wallpaper,
-                accent   = accent,
-                onClick  = { wallpaperPicker.launch(arrayOf("image/*")) }
-            )
-            if (settings.wallpaperUri.isNotEmpty()) {
-                Column {
-                    SettingsRow(
-                        label    = stringResource(R.string.wallpaper_dim),
-                        sublabel = "${"%.0f".format(settings.wallpaperDim * 100)}%",
-                        icon     = Icons.Default.BrightnessLow
-                    ) {}
-                    Slider(
-                        value         = settings.wallpaperDim,
-                        onValueChange = { onUpdate { copy(wallpaperDim = it) } },
-                        valueRange    = 0f..0.95f,
-                        steps         = 18,
-                        colors        = sliderColors(accent),
-                        modifier      = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    TextButton(
-                        onClick  = { onUpdate { copy(wallpaperUri = "") } },
-                        modifier = Modifier.align(Alignment.End)
-                    ) {
-                        Text(stringResource(R.string.remove_wallpaper), color = Color(0xFF993333), fontSize = 9.sp, letterSpacing = 1.sp)
-                    }
-                }
-            }
         }
 
         // ── Language ─────────────────────────────────────────────────────────
@@ -694,71 +585,6 @@ fun SettingsScreen(
                         )
                     }
                 }
-            }
-        }
-
-        // ── Typography ───────────────────────────────────────────────────────
-        SettingsSection(stringResource(R.string.settings_section_typography)) {
-            SettingsRow(label = stringResource(R.string.font_label), sublabel = fontDisplayName(settings.appFont), icon = Icons.Default.FontDownload) {
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    com.openlauncher.app.data.AppFont.entries.forEach { font ->
-                        FilterChip(
-                            selected = settings.appFont == font,
-                            onClick  = { onUpdate { copy(appFont = font) } },
-                            label    = { Text(fontDisplayName(font), fontSize = 9.sp, letterSpacing = 0.5.sp) },
-                            colors   = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = accent,
-                                selectedLabelColor     = Color.Black
-                            )
-                        )
-                    }
-                }
-            }
-
-            SettingsDivider()
-
-            SettingsRow(label = stringResource(R.string.bold_font), sublabel = stringResource(R.string.bold_font_sub), icon = Icons.Default.FormatBold) {
-                Switch(
-                    checked         = settings.fontBold,
-                    onCheckedChange = { onUpdate { copy(fontBold = it) } },
-                    colors          = switchColors(accent)
-                )
-            }
-
-            SettingsDivider()
-
-            Column {
-                SettingsRow(
-                    label    = stringResource(R.string.text_scale),
-                    sublabel = "${"%.0f".format(settings.textScale * 100)}%",
-                    icon     = Icons.Default.TextFields
-                ) {}
-                Slider(
-                    value         = settings.textScale,
-                    onValueChange = { onUpdate { copy(textScale = it) } },
-                    valueRange    = 0.8f..1.4f,
-                    steps         = 5,
-                    colors        = sliderColors(accent),
-                    modifier      = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
-                )
-            }
-
-            SettingsDivider()
-
-            Column {
-                SettingsRow(
-                    label    = stringResource(R.string.ui_scale),
-                    sublabel = "${"%.0f".format(settings.uiScale * 100)}%  — ${stringResource(R.string.ui_scale_sub)}",
-                    icon     = Icons.Default.ZoomIn
-                ) {}
-                Slider(
-                    value         = settings.uiScale,
-                    onValueChange = { onUpdate { copy(uiScale = it) } },
-                    valueRange    = 0.7f..1.5f,
-                    steps         = 7,
-                    colors        = sliderColors(accent),
-                    modifier      = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
-                )
             }
         }
 

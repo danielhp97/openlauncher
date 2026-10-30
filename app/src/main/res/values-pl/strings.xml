@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Open Launcher</string>
-    <string name="settings_label">Ustawienia Open Launcher</string>
-    <string name="media_label">Media Open Launcher</string>
+    <string name="app_name">Africa Twin</string>
+    <string name="settings_label">Ustawienia Africa Twin</string>
+    <string name="media_label">Media Africa Twin</string>
 
     <!-- General / Navigation -->
     <string name="settings_title">USTAWIENIA</string>
@@ -27,8 +27,8 @@
 
     <!-- Permissions -->
     <string name="perm_default_launcher">Ustaw jako domyślny launcher</string>
-    <string name="perm_default_launcher_active">Aktywny — Open Launcher jest aplikacją główną</string>
-    <string name="perm_default_launcher_sub">Wymagane, aby urządzenie uruchamiało Open Launcher</string>
+    <string name="perm_default_launcher_active">Aktywny — Africa Twin jest aplikacją główną</string>
+    <string name="perm_default_launcher_sub">Wymagane, aby urządzenie uruchamiało Africa Twin</string>
     <string name="perm_notification_access">Dostęp do powiadomień</string>
     <string name="perm_notification_granted">Przyznano — sterowanie mediami aktywne</string>
     <string name="perm_notification_sub">Wymagane dla widżetu Teraz odtwarzane</string>
@@ -273,7 +273,7 @@
 
     <!-- Media Player / Radio Controls -->
     <string name="radio_no_source">BRAK ŹRÓDŁA RADIOWEGO</string>
-    <string name="radio_assign_sub">Uruchom aplikację radia w radiodtwarzaczu — lub przypisz ją poniżej, aby Open Launcher mógł ją kontrolować</string>
+    <string name="radio_assign_sub">Uruchom aplikację radia w radiodtwarzaczu — lub przypisz ją poniżej, aby Africa Twin mógł ją kontrolować</string>
     <string name="radio_assign_app">PRZYPISZ APLIKACJĘ RADIA</string>
     <string name="radio_seek_left">◄ SZUKAJ</string>
     <string name="radio_open">OTWÓRZ</string>
@@ -384,4 +384,20 @@
     <string name="odometer_channel_name">Licznik kilometrów</string>
     <string name="odometer_notification_title">Licznik kilometrów aktywny</string>
     <string name="odometer_notification_text">Rejestrowanie dystansu GPS</string>
+    <string name="ride_no_gps">Brak GPS</string>
+    <string name="ride_hold_to_reset">Przytrzymaj, aby wyzerować</string>
+    <string name="ride_fuel">PALIWO</string>
+    <string name="ride_since_fillup">%1$s od tankowania</string>
+    <string name="ride_no_fillups">Brak tankowań</string>
+    <string name="ride_reset_trip_title">Wyzerować trasę?</string>
+    <string name="ride_reset_trip_message">Zeruje licznik trasy. Licznik całkowity zachowuje stan.</string>
+    <string name="ride_choose_app">Przytrzymaj, aby wybrać</string>
+    <string name="choose_ride_app">WYBIERZ APLIKACJĘ DLA KAFELKA</string>
+    <string name="ride_screen">Ekran jazdy</string>
+    <string name="ride_screen_desc">Prosty ekran: prędkość, trasa, paliwo i cztery aplikacje. Przytrzymaj zegar, aby tu wrócić.</string>
+    <string name="bike_logo">Logo / grafika</string>
+    <string name="bike_logo_sub">Logo lub grafika zbiornika motocykla, wyświetlane na desce</string>
+    <string name="bike_logo_set">Logo wyświetlane na desce i tutaj</string>
+    <string name="bike_logo_choose">Wybierz obraz</string>
+    <string name="bike_logo_remove">Usuń</string>
 </resources>

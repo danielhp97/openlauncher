@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Open Launcher</string>
-    <string name="settings_label">Настройки Open Launcher</string>
-    <string name="media_label">Медиа Open Launcher</string>
+    <string name="app_name">Africa Twin</string>
+    <string name="settings_label">Настройки Africa Twin</string>
+    <string name="media_label">Медиа Africa Twin</string>
 
     <!-- General / Navigation -->
     <string name="settings_title">НАСТРОЙКИ</string>
@@ -27,8 +27,8 @@
 
     <!-- Permissions -->
     <string name="perm_default_launcher">Установить по умолчанию</string>
-    <string name="perm_default_launcher_active">Активно — Open Launcher используется как главный экран</string>
-    <string name="perm_default_launcher_sub">Необходимо для запуска Open Launcher при включении головного устройства</string>
+    <string name="perm_default_launcher_active">Активно — Africa Twin используется как главный экран</string>
+    <string name="perm_default_launcher_sub">Необходимо для запуска Africa Twin при включении головного устройства</string>
     <string name="perm_notification_access">Доступ к уведомлениям</string>
     <string name="perm_notification_granted">Разрешено — управление медиа активно</string>
     <string name="perm_notification_sub">Необходимо для виджета «Сейчас играет»</string>
@@ -274,7 +274,7 @@
 
     <!-- Media Player / Radio Controls -->
     <string name="radio_no_source">НЕТ ИСТОЧНИКА РАДИО</string>
-    <string name="radio_assign_sub">Запустите радио головного устройства или назначьте приложение ниже, чтобы Open Launcher мог отображать его и управлять им</string>
+    <string name="radio_assign_sub">Запустите радио головного устройства или назначьте приложение ниже, чтобы Africa Twin мог отображать его и управлять им</string>
     <string name="radio_assign_app">НАЗНАЧИТЬ РАДИОПРИЛОЖЕНИЕ</string>
     <string name="radio_seek_left">◄ ПОИСК</string>
     <string name="radio_open">ОТКРЫТЬ</string>
@@ -385,4 +385,20 @@
     <string name="odometer_channel_name">Одометр</string>
     <string name="odometer_notification_title">Одометр работает</string>
     <string name="odometer_notification_text">Запись пройденного пути по GPS</string>
+    <string name="ride_no_gps">Нет GPS</string>
+    <string name="ride_hold_to_reset">Удерживайте для сброса</string>
+    <string name="ride_fuel">ТОПЛИВО</string>
+    <string name="ride_since_fillup">%1$s после заправки</string>
+    <string name="ride_no_fillups">Нет заправок</string>
+    <string name="ride_reset_trip_title">Сбросить поездку?</string>
+    <string name="ride_reset_trip_message">Обнуляет счётчик поездки. Общий пробег сохраняется.</string>
+    <string name="ride_choose_app">Удерживайте для выбора</string>
+    <string name="choose_ride_app">ВЫБЕРИТЕ ПРИЛОЖЕНИЕ ДЛЯ ПЛИТКИ</string>
+    <string name="ride_screen">Экран поездки</string>
+    <string name="ride_screen_desc">Простой экран: скорость, поездка, топливо и четыре приложения. Удерживайте часы, чтобы вернуться сюда.</string>
+    <string name="bike_logo">Логотип / графика</string>
+    <string name="bike_logo_sub">Логотип или графика бака мотоцикла на приборной панели</string>
+    <string name="bike_logo_set">Логотип показан на панели и здесь</string>
+    <string name="bike_logo_choose">Выбрать изображение</string>
+    <string name="bike_logo_remove">Удалить</string>
 </resources>

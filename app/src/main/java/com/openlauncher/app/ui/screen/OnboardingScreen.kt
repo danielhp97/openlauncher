@@ -146,14 +146,14 @@ fun OnboardingScreen(
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Icon(
-                        imageVector = Icons.Default.DirectionsCar,
+                        imageVector = Icons.Default.TwoWheeler,
                         contentDescription = null,
                         tint = accent,
                         modifier = Modifier.size(44.dp)
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "OPEN LAUNCHER",
+                        text = "AFRICA TWIN",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = ObTextPrimary,
@@ -161,7 +161,7 @@ fun OnboardingScreen(
                         fontSize = 15.sp
                     )
                     Text(
-                        text = "Designed for the dashboard",
+                        text = "XRV750 · 1991 · RD04",
                         color = ObTextBody,
                         fontSize = 11.sp,
                         letterSpacing = 0.5.sp
@@ -366,7 +366,7 @@ private fun StepItem(stepIndex: Int, title: String, currentStep: Int) {
 private fun IntroStep(accent: Color) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text(
-            text = "WELCOME TO OPEN LAUNCHER",
+            text = "AFRICA TWIN XRV750",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = accent,
@@ -374,7 +374,7 @@ private fun IntroStep(accent: Color) {
             fontSize = 20.sp
         )
         Text(
-            text = "A clean, modern landscape dashboard designed to be the ultimate companion for your car's screen.",
+            text = "The dash for a 1991 Honda Africa Twin: speed, trip, odometer, fuel and your ride apps on one glove-friendly screen.",
             color = ObTextBody,
             fontSize = 13.sp,
             lineHeight = 20.sp
@@ -383,9 +383,9 @@ private fun IntroStep(accent: Color) {
         Spacer(Modifier.height(8.dp))
 
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            BulletItem(Icons.Default.CloudOff, "Mostly Offline", "The dashboard, themes, speedometer, compass, and altimeter all work with zero signal. Weather and place names need a data connection — see Settings for exactly which is which.")
-            BulletItem(Icons.Default.Palette, "Highly Customizable Dashboard", "Tailor color accents, background gradients, typography fonts, system units, and drag-and-drop to rearrange your tiles.")
-            BulletItem(Icons.Default.VolumeUp, "Soundboard & Media Shortcuts", "Trigger custom soundboard sound effects, manage CarPlay & Android Auto shortcuts, and control active media players.")
+            BulletItem(Icons.Default.Speed, "A Real Odometer Again", "GPS counts every kilometre in the background — through OsmAnd, CarPlay and power-offs — for trip, odometer and fuel economy.")
+            BulletItem(Icons.Default.LocalGasStation, "Fuel Log", "Log a fill-up in two taps with the odometer pre-filled, and see L/100 km and the distance since your last tank.")
+            BulletItem(Icons.Default.CloudOff, "Works Offline", "Speed, trip, odometer and fuel need no signal. Only place names and weather use a data connection.")
         }
     }
 }
@@ -402,7 +402,7 @@ private fun LocationStep(accent: Color, isGranted: Boolean, onGrant: () -> Unit)
             fontSize = 20.sp
         )
         Text(
-            text = "To compute your real-time speed, compass bearing, altitude telemetry, and update local weather conditions, Open Launcher requires high-precision GPS services.",
+            text = "To compute your real-time speed, compass bearing, altitude telemetry, and update local weather conditions, the Africa Twin dash needs high-precision GPS.",
             color = ObTextBody,
             fontSize = 13.sp,
             lineHeight = 20.sp
@@ -472,7 +472,7 @@ private fun MediaStep(accent: Color, isGranted: Boolean, onGrant: () -> Unit) {
             fontSize = 20.sp
         )
         Text(
-            text = "To capture live album art, track info, progress bars, and provide playback control from your dashboard cards, Open Launcher listens to active media notifications.",
+            text = "To capture live album art, track info, progress bars, and provide playback control on the dash, the Africa Twin dash listens to active media notifications.",
             color = ObTextBody,
             fontSize = 13.sp,
             lineHeight = 20.sp
@@ -505,7 +505,7 @@ private fun MediaStep(accent: Color, isGranted: Boolean, onGrant: () -> Unit) {
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = if (isGranted) "Music player widget is connected." else "Now Playing dashboard will remain inactive.",
+                        text = if (isGranted) "Music player widget is connected." else "Now Playing will remain inactive.",
                         color = ObTextBody,
                         fontSize = 11.sp
                     )
@@ -542,7 +542,7 @@ private fun FinalStep(accent: Color, onSetDefault: () -> Unit) {
             fontSize = 20.sp
         )
         Text(
-            text = "You are all set up and ready to go. You can set Open Launcher as your default home app so it launches automatically whenever you start your vehicle.",
+            text = "You are all set up and ready to go. Set the Africa Twin dash as the home app so it comes up every time you turn the key.",
             color = ObTextBody,
             fontSize = 13.sp,
             lineHeight = 20.sp

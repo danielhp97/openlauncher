@@ -87,7 +87,7 @@ data class WidgetConfig(
 )
 
 data class AppSettings(
-    val vehicleName: String = "MY CAR",
+    val vehicleName: String = "AFRICA TWIN",
     val accentColor: Int = Color.White.toArgb(),
     val backgroundColor: Int = Color.Black.toArgb(),
     val fontColor: Int = Color.White.toArgb(),
@@ -137,7 +137,7 @@ data class AppSettings(
     val locationRefreshInterval: LocationRefreshInterval = LocationRefreshInterval.SEC_30,
     // "custom" = fall back to the manually-picked accentColor/backgroundColor below;
     // any DASHBOARD_THEMES id = use that preset's accent+surface for the current mode.
-    val themeId: String = "ignition",
+    val themeId: String = BIKE_THEME_ID,
     // Weather panel enrichment — merged into the existing panel rather than
     // adding new ones, each independently toggleable so the panel doesn't
     // get crowded if the driver only wants some of them.
@@ -149,7 +149,24 @@ data class AppSettings(
     val showQuickTogglesInClock: Boolean = true,
     // Now Playing panel enrichment
     val showNowPlayingSourceBadge: Boolean = true,
-    val use24HourFormat: Boolean = true
+    val use24HourFormat: Boolean = true,
+    // Ride screen: a single glove-friendly home (data on top, 4 app tiles) that
+    // replaces the widget grid + sidebar. Long-press the clock for the full launcher.
+    val rideMode: Boolean = true,
+    // Owner-supplied bike logo / tank artwork (SAF document URI), shown on the Ride
+    // screen and in Settings. Kept on the device, never bundled in the repo.
+    val logoUri: String = "",
+    val rideApps: List<String> = defaultRideApps()
+)
+
+const val RIDE_APP_SLOTS = 4
+
+// CarPlay (Ekiy/zlink), Spotify, OsmAnd+, Google Maps — reassignable by long-press
+fun defaultRideApps() = listOf(
+    "com.zjinnova.zlink",
+    "com.spotify.music",
+    "net.osmand.plus",
+    "com.google.android.apps.maps"
 )
 
 fun defaultShortcuts() = listOf(

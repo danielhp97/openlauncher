@@ -74,6 +74,9 @@ class SettingsRepository(private val context: Context) {
         val SHOW_QUICK_TOGGLES_IN_CLOCK = booleanPreferencesKey("show_quick_toggles_in_clock")
         val SHOW_NOW_PLAYING_SOURCE_BADGE = booleanPreferencesKey("show_now_playing_source_badge")
         val USE_24_HOUR_FORMAT    = booleanPreferencesKey("use_24_hour_format")
+        val RIDE_MODE             = booleanPreferencesKey("ride_mode")
+        val RIDE_APPS_JSON        = stringPreferencesKey("ride_apps_json")
+        val LOGO_URI              = stringPreferencesKey("logo_uri")
     }
 
     val settingsFlow: Flow<AppSettings> = context.dataStore.data
@@ -105,17 +108,18 @@ class SettingsRepository(private val context: Context) {
             } else defaults.widgetLayout
 
             return AppSettings(
-                vehicleName    = prefs[Keys.VEHICLE_NAME]     ?: defaults.vehicleName,
+                // Upstream's generic default is replaced by the bike's name
+                vehicleName    = prefs[Keys.VEHICLE_NAME]?.takeIf { it != "MY CAR" } ?: defaults.vehicleName,
                 accentColor    = prefs[Keys.ACCENT_COLOR]     ?: defaults.accentColor,
                 backgroundColor = prefs[Keys.BG_COLOR]        ?: defaults.backgroundColor,
                 fontColor      = prefs[Keys.FONT_COLOR]       ?: defaults.fontColor,
-                wallpaperUri   = prefs[Keys.WALLPAPER_URI]    ?: defaults.wallpaperUri,
-                fontBold       = prefs[Keys.FONT_BOLD]        ?: defaults.fontBold,
-                textScale      = prefs[Keys.TEXT_SCALE]       ?: defaults.textScale,
-                uiScale        = prefs[Keys.UI_SCALE]         ?: defaults.uiScale,
+                wallpaperUri   = defaults.wallpaperUri,   // single fixed look: see BIKE_THEME_ID
+                fontBold       = defaults.fontBold,
+                textScale      = defaults.textScale,
+                uiScale        = defaults.uiScale,
                 clockStyle     = prefs[Keys.CLOCK_STYLE]?.let { runCatching { ClockStyle.valueOf(it) }.getOrNull() } ?: defaults.clockStyle,
                 unitSystem     = prefs[Keys.UNIT_SYSTEM]?.let { runCatching { UnitSystem.valueOf(it) }.getOrNull() } ?: defaults.unitSystem,
-                appFont        = prefs[Keys.APP_FONT]?.let { runCatching { AppFont.valueOf(it) }.getOrNull() } ?: defaults.appFont,
+                appFont        = defaults.appFont,
                 appLanguage    = prefs[Keys.APP_LANGUAGE]?.let { runCatching { AppLanguage.valueOf(it) }.getOrNull() } ?: defaults.appLanguage,
                 showWeather    = prefs[Keys.SHOW_WEATHER]     ?: defaults.showWeather,
                 showClock      = prefs[Keys.SHOW_CLOCK]       ?: defaults.showClock,
@@ -127,7 +131,7 @@ class SettingsRepository(private val context: Context) {
                 widgetLayout   = widgets,
                 carPlayPackage      = prefs[Keys.CAR_PLAY_PACKAGE]      ?: defaults.carPlayPackage,
                 androidAutoPackage  = prefs[Keys.ANDROID_AUTO_PACKAGE]  ?: defaults.androidAutoPackage,
-                useGradient      = prefs[Keys.USE_GRADIENT]        ?: defaults.useGradient,
+                useGradient      = defaults.useGradient,
                 gradientEndColor = prefs[Keys.GRADIENT_END_COLOR]  ?: defaults.gradientEndColor,
                 wallpaperDim     = prefs[Keys.WALLPAPER_DIM]       ?: defaults.wallpaperDim,
                 sidebarPosition  = prefs[Keys.SIDEBAR_POSITION]?.let { runCatching { SidebarPosition.valueOf(it) }.getOrNull() }
@@ -150,7 +154,7 @@ class SettingsRepository(private val context: Context) {
                 vitalsAsBars     = prefs[Keys.VITALS_AS_BARS] ?: defaults.vitalsAsBars,
                 speedometerDigitalOnly = prefs[Keys.SPEEDOMETER_DIGITAL_ONLY] ?: defaults.speedometerDigitalOnly,
                 gradientDirection = prefs[Keys.GRADIENT_DIRECTION]?.let { runCatching { GradientDirection.valueOf(it) }.getOrNull() } ?: defaults.gradientDirection,
-                useCustomBackgroundColor = prefs[Keys.USE_CUSTOM_BG_COLOR] ?: defaults.useCustomBackgroundColor,
+                useCustomBackgroundColor = defaults.useCustomBackgroundColor,
                 showFuelLog      = prefs[Keys.SHOW_FUEL_LOG]    ?: defaults.showFuelLog,
                 fuelLog          = prefs[Keys.FUEL_LOG_JSON]?.let {
                     runCatching {
@@ -158,7 +162,7 @@ class SettingsRepository(private val context: Context) {
                     }.getOrNull()
                 } ?: defaults.fuelLog,
                 showQuickToggles = prefs[Keys.SHOW_QUICK_TOGGLES] ?: defaults.showQuickToggles,
-                themeId          = prefs[Keys.THEME_ID] ?: defaults.themeId,
+                themeId          = BIKE_THEME_ID,
                 showLocation     = prefs[Keys.SHOW_LOCATION] ?: defaults.showLocation,
                 locationDetailLevel = prefs[Keys.LOCATION_DETAIL_LEVEL]?.let { runCatching { LocationDetailLevel.valueOf(it) }.getOrNull() } ?: defaults.locationDetailLevel,
                 locationRefreshInterval = prefs[Keys.LOCATION_REFRESH_INTERVAL]?.let { runCatching { LocationRefreshInterval.valueOf(it) }.getOrNull() } ?: defaults.locationRefreshInterval,
@@ -168,7 +172,14 @@ class SettingsRepository(private val context: Context) {
                 showSunriseSunset = prefs[Keys.SHOW_SUNRISE_SUNSET] ?: defaults.showSunriseSunset,
                 showQuickTogglesInClock = prefs[Keys.SHOW_QUICK_TOGGLES_IN_CLOCK] ?: defaults.showQuickTogglesInClock,
                 showNowPlayingSourceBadge = prefs[Keys.SHOW_NOW_PLAYING_SOURCE_BADGE] ?: defaults.showNowPlayingSourceBadge,
-                use24HourFormat  = prefs[Keys.USE_24_HOUR_FORMAT] ?: defaults.use24HourFormat
+                use24HourFormat  = prefs[Keys.USE_24_HOUR_FORMAT] ?: defaults.use24HourFormat,
+                rideMode         = prefs[Keys.RIDE_MODE] ?: defaults.rideMode,
+                logoUri          = prefs[Keys.LOGO_URI] ?: defaults.logoUri,
+                rideApps         = prefs[Keys.RIDE_APPS_JSON]?.let {
+                    runCatching {
+                        gson.fromJson<List<String>>(it, object : TypeToken<List<String>>() {}.type)
+                    }.getOrNull()
+                }?.takeIf { it.size == RIDE_APP_SLOTS } ?: defaults.rideApps
             )
     }
 
@@ -240,6 +251,9 @@ class SettingsRepository(private val context: Context) {
             prefs[Keys.SHOW_QUICK_TOGGLES_IN_CLOCK] = s.showQuickTogglesInClock
             prefs[Keys.SHOW_NOW_PLAYING_SOURCE_BADGE] = s.showNowPlayingSourceBadge
             prefs[Keys.USE_24_HOUR_FORMAT] = s.use24HourFormat
+            prefs[Keys.RIDE_MODE]          = s.rideMode
+            prefs[Keys.LOGO_URI]           = s.logoUri
+            prefs[Keys.RIDE_APPS_JSON]     = gson.toJson(s.rideApps)
     }
 
     suspend fun resetToDefaults() {
