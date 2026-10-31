@@ -401,4 +401,18 @@
     <string name="bike_logo_set">Logo shown on the dash and here</string>
     <string name="bike_logo_choose">Choose image</string>
     <string name="bike_logo_remove">Remove</string>
+    <string name="phone_gps">iPhone GPS (GPS2IP)</string>
+    <string name="phone_gps_off">Off — the unit has no GPS of its own</string>
+    <string name="phone_gps_no_wifi">Waiting for Wi-Fi — join the iPhone hotspot</string>
+    <string name="phone_gps_connecting">Connecting to %1$s…</string>
+    <string name="phone_gps_waiting">Connected to %1$s, waiting for a position</string>
+    <string name="phone_gps_listening">Listening on port %1$s</string>
+    <string name="phone_gps_receiving">Receiving position from %1$s</string>
+    <string name="phone_gps_no_permission">Mock location not allowed. Grant once over adb: appops set com.openlauncher.app android:mock_location allow</string>
+    <string name="phone_gps_mode">Connection</string>
+    <string name="phone_gps_mode_connect">Unit connects</string>
+    <string name="phone_gps_mode_listen">iPhone pushes</string>
+    <string name="phone_gps_address">Address and port</string>
+    <string name="phone_gps_address_sub">Leave the address empty to use the hotspot (iPhone)</string>
+    <string name="phone_gps_auto">Auto</string>
 </resources>

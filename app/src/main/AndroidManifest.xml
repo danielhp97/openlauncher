@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Network for weather API -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -45,6 +46,9 @@
     <!-- Lets the odometer get fixes when started from BOOT_COMPLETED, before the
          launcher has been in front ("Allow all the time"). -->
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <!-- Phone GPS (GPS2IP) is fed in as a mock gps provider; the app-op is granted over adb -->
+    <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION"
+        tools:ignore="MockLocation,ProtectedPermissions" />
 
     <!-- Required on API 30+ so PackageManager returns ALL launcher apps -->
     <queries>

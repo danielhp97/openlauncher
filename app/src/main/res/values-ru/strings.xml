@@ -401,4 +401,18 @@
     <string name="bike_logo_set">Логотип показан на панели и здесь</string>
     <string name="bike_logo_choose">Выбрать изображение</string>
     <string name="bike_logo_remove">Удалить</string>
+    <string name="phone_gps">GPS с iPhone (GPS2IP)</string>
+    <string name="phone_gps_off">Выкл. – у устройства нет своего GPS</string>
+    <string name="phone_gps_no_wifi">Ожидание Wi-Fi – подключитесь к точке доступа iPhone</string>
+    <string name="phone_gps_connecting">Подключение к %1$s…</string>
+    <string name="phone_gps_waiting">Подключено к %1$s, ожидание координат</string>
+    <string name="phone_gps_listening">Прослушивание порта %1$s</string>
+    <string name="phone_gps_receiving">Координаты от %1$s</string>
+    <string name="phone_gps_no_permission">Фиктивное местоположение запрещено. Разрешите через adb: appops set com.openlauncher.app android:mock_location allow</string>
+    <string name="phone_gps_mode">Подключение</string>
+    <string name="phone_gps_mode_connect">Устройство подключается</string>
+    <string name="phone_gps_mode_listen">iPhone отправляет</string>
+    <string name="phone_gps_address">Адрес и порт</string>
+    <string name="phone_gps_address_sub">Оставьте адрес пустым для точки доступа (iPhone)</string>
+    <string name="phone_gps_auto">Авто</string>
 </resources>

@@ -42,6 +42,9 @@ import com.openlauncher.app.data.ShortcutConfig
 import com.openlauncher.app.data.GradientDirection
 import com.openlauncher.app.data.UnitSystem
 import com.openlauncher.app.data.LocationRefreshInterval
+import com.openlauncher.app.data.PHONE_GPS_DEFAULT_PORT
+import com.openlauncher.app.data.PhoneGpsMode
+import com.openlauncher.app.service.PhoneGpsReceiver
 import com.openlauncher.app.ui.theme.LocalDayMode
 import com.openlauncher.app.ui.theme.onAccentColor
 import com.openlauncher.app.util.SunriseSunset
@@ -590,6 +593,92 @@ fun SettingsScreen(
 
         // ── GPS & Calibration ───────────────────────────────────────────────
         SettingsSection(stringResource(R.string.settings_section_gps)) {
+            // Phone GPS (GPS2IP): the unit's own GPS is unusable, the iPhone is the receiver
+            val phoneGpsStatus by PhoneGpsReceiver.status.collectAsState()
+            val listenPort = settings.phoneGpsPort.toString()
+            SettingsRow(
+                label    = stringResource(R.string.phone_gps),
+                sublabel = when {
+                    !settings.phoneGpsEnabled -> stringResource(R.string.phone_gps_off)
+                    else -> when (phoneGpsStatus.state) {
+                        PhoneGpsReceiver.State.OFF,
+                        PhoneGpsReceiver.State.NO_WIFI       -> stringResource(R.string.phone_gps_no_wifi)
+                        PhoneGpsReceiver.State.CONNECTING    -> stringResource(R.string.phone_gps_connecting, phoneGpsStatus.endpoint)
+                        PhoneGpsReceiver.State.WAITING       ->
+                            if (settings.phoneGpsMode == PhoneGpsMode.LISTEN) stringResource(R.string.phone_gps_listening, listenPort)
+                            else stringResource(R.string.phone_gps_waiting, phoneGpsStatus.endpoint)
+                        PhoneGpsReceiver.State.RECEIVING     -> stringResource(R.string.phone_gps_receiving, phoneGpsStatus.endpoint)
+                        PhoneGpsReceiver.State.NO_PERMISSION -> stringResource(R.string.phone_gps_no_permission)
+                    }
+                },
+                icon     = Icons.Default.PhoneIphone
+            ) {
+                Switch(checked = settings.phoneGpsEnabled,
+                    onCheckedChange = { onUpdate { copy(phoneGpsEnabled = it) } },
+                    colors = switchColors(accent))
+            }
+
+            if (settings.phoneGpsEnabled) {
+                SettingsDivider()
+                SettingsRow(
+                    label    = stringResource(R.string.phone_gps_mode),
+                    icon     = Icons.Default.SwapHoriz
+                ) {
+                    PhoneGpsMode.entries.forEach { mode ->
+                        val selected = settings.phoneGpsMode == mode
+                        TextButton(onClick = { onUpdate { copy(phoneGpsMode = mode) } }) {
+                            Text(
+                                stringResource(if (mode == PhoneGpsMode.CONNECT) R.string.phone_gps_mode_connect else R.string.phone_gps_mode_listen),
+                                color = if (selected) accent else if (isDayMode) Color(0xFF999999) else Color(0xFF555555),
+                                fontSize = 10.sp
+                            )
+                        }
+                    }
+                }
+
+                SettingsDivider()
+                var hostInput by remember(settings.phoneGpsHost) { mutableStateOf(settings.phoneGpsHost) }
+                var portInput by remember(settings.phoneGpsPort) { mutableStateOf(settings.phoneGpsPort.toString()) }
+                val portValue = portInput.toIntOrNull()?.takeIf { it in 1..65535 }
+                SettingsRow(
+                    label    = stringResource(R.string.phone_gps_address),
+                    sublabel = stringResource(R.string.phone_gps_address_sub),
+                    icon     = Icons.Default.Router
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        val fieldText = LocalTextStyle.current.copy(fontSize = 12.sp, color = if (isDayMode) Color(0xFF111111) else Color.White)
+                        val hintColor = if (isDayMode) Color(0xFF999999) else Color(0xFF444444)
+                        if (settings.phoneGpsMode == PhoneGpsMode.CONNECT) {
+                            OutlinedTextField(
+                                value         = hostInput,
+                                onValueChange = { hostInput = it.trim() },
+                                placeholder   = { Text(stringResource(R.string.phone_gps_auto), color = hintColor, fontSize = 12.sp) },
+                                singleLine    = true,
+                                textStyle     = fieldText,
+                                colors        = outlinedFieldColors(accent),
+                                modifier      = Modifier.width(130.dp)
+                            )
+                        }
+                        OutlinedTextField(
+                            value         = portInput,
+                            onValueChange = { portInput = it.filter(Char::isDigit).take(5) },
+                            placeholder   = { Text(PHONE_GPS_DEFAULT_PORT.toString(), color = hintColor, fontSize = 12.sp) },
+                            singleLine    = true,
+                            textStyle     = fieldText,
+                            colors        = outlinedFieldColors(accent),
+                            modifier      = Modifier.width(80.dp)
+                        )
+                        if (portValue != null && (hostInput != settings.phoneGpsHost || portValue != settings.phoneGpsPort)) {
+                            IconButton(onClick = { onUpdate { copy(phoneGpsHost = hostInput, phoneGpsPort = portValue) } }, modifier = Modifier.size(32.dp)) {
+                                Icon(Icons.Default.Check, stringResource(R.string.save), tint = accent, modifier = Modifier.size(16.dp))
+                            }
+                        }
+                    }
+                }
+            }
+
+            SettingsDivider()
+
             var calibrationStatus by remember { mutableStateOf<String?>(null) }
             val coroutineScope = rememberCoroutineScope()
             var isCalibratingCompass by remember { mutableStateOf(false) }

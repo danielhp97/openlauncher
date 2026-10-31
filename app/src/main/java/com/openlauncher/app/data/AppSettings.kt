@@ -10,6 +10,9 @@ enum class AppLanguage { SYSTEM, ENGLISH, POLISH, GERMAN, SPANISH, RUSSIAN, FREN
 enum class DayNightMode { DARK, LIGHT, AUTO, SYSTEM }
 enum class SidebarPosition { LEFT, RIGHT, BOTTOM }
 enum class GradientDirection { TOP_TO_BOTTOM, LEFT_TO_RIGHT, DIAGONAL, RADIAL }
+// Phone GPS (GPS2IP): CONNECT = unit connects to the phone's socket server,
+// LISTEN = phone pushes to the unit (TCP or UDP)
+enum class PhoneGpsMode { CONNECT, LISTEN }
 // How granular the reverse-geocoded place name is. NEIGHBORHOOD is the finest
 // (e.g. "Boon Keng") — needed in dense cities where CITY/REGION both just
 // collapse to the city-state's own name (Singapore, Monaco, etc).
@@ -156,8 +159,16 @@ data class AppSettings(
     // Owner-supplied bike logo / tank artwork (SAF document URI), shown on the Ride
     // screen and in Settings. Kept on the device, never bundled in the repo.
     val logoUri: String = "",
-    val rideApps: List<String> = defaultRideApps()
+    val rideApps: List<String> = defaultRideApps(),
+    // GPS from the rider's iPhone (GPS2IP) — the unit's own GPS is unusable.
+    // Blank host = the Wi-Fi gateway, i.e. the iPhone when on its Personal Hotspot.
+    val phoneGpsEnabled: Boolean = true,
+    val phoneGpsMode: PhoneGpsMode = PhoneGpsMode.CONNECT,
+    val phoneGpsHost: String = "",
+    val phoneGpsPort: Int = PHONE_GPS_DEFAULT_PORT
 )
+
+const val PHONE_GPS_DEFAULT_PORT = 11123 // GPS2IP's default
 
 const val RIDE_APP_SLOTS = 4
 

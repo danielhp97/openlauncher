@@ -400,4 +400,18 @@
     <string name="bike_logo_set">Logo wyświetlane na desce i tutaj</string>
     <string name="bike_logo_choose">Wybierz obraz</string>
     <string name="bike_logo_remove">Usuń</string>
+    <string name="phone_gps">GPS z iPhone\'a (GPS2IP)</string>
+    <string name="phone_gps_off">Wyłączone – urządzenie nie ma własnego GPS</string>
+    <string name="phone_gps_no_wifi">Czekam na Wi-Fi – połącz z hotspotem iPhone\'a</string>
+    <string name="phone_gps_connecting">Łączenie z %1$s…</string>
+    <string name="phone_gps_waiting">Połączono z %1$s, czekam na pozycję</string>
+    <string name="phone_gps_listening">Nasłuch na porcie %1$s</string>
+    <string name="phone_gps_receiving">Pozycja z %1$s</string>
+    <string name="phone_gps_no_permission">Pozorowana lokalizacja niedozwolona. Nadaj przez adb: appops set com.openlauncher.app android:mock_location allow</string>
+    <string name="phone_gps_mode">Połączenie</string>
+    <string name="phone_gps_mode_connect">Urządzenie łączy</string>
+    <string name="phone_gps_mode_listen">iPhone wysyła</string>
+    <string name="phone_gps_address">Adres i port</string>
+    <string name="phone_gps_address_sub">Zostaw adres pusty, aby użyć hotspotu (iPhone)</string>
+    <string name="phone_gps_auto">Auto</string>
 </resources>

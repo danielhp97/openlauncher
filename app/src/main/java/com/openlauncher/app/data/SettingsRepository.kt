@@ -77,6 +77,10 @@ class SettingsRepository(private val context: Context) {
         val RIDE_MODE             = booleanPreferencesKey("ride_mode")
         val RIDE_APPS_JSON        = stringPreferencesKey("ride_apps_json")
         val LOGO_URI              = stringPreferencesKey("logo_uri")
+        val PHONE_GPS_ENABLED     = booleanPreferencesKey("phone_gps_enabled")
+        val PHONE_GPS_MODE        = stringPreferencesKey("phone_gps_mode")
+        val PHONE_GPS_HOST        = stringPreferencesKey("phone_gps_host")
+        val PHONE_GPS_PORT        = intPreferencesKey("phone_gps_port")
     }
 
     val settingsFlow: Flow<AppSettings> = context.dataStore.data
@@ -179,7 +183,11 @@ class SettingsRepository(private val context: Context) {
                     runCatching {
                         gson.fromJson<List<String>>(it, object : TypeToken<List<String>>() {}.type)
                     }.getOrNull()
-                }?.takeIf { it.size == RIDE_APP_SLOTS } ?: defaults.rideApps
+                }?.takeIf { it.size == RIDE_APP_SLOTS } ?: defaults.rideApps,
+                phoneGpsEnabled  = prefs[Keys.PHONE_GPS_ENABLED] ?: defaults.phoneGpsEnabled,
+                phoneGpsMode     = prefs[Keys.PHONE_GPS_MODE]?.let { runCatching { PhoneGpsMode.valueOf(it) }.getOrNull() } ?: defaults.phoneGpsMode,
+                phoneGpsHost     = prefs[Keys.PHONE_GPS_HOST] ?: defaults.phoneGpsHost,
+                phoneGpsPort     = prefs[Keys.PHONE_GPS_PORT]?.takeIf { it in 1..65535 } ?: defaults.phoneGpsPort
             )
     }
 
@@ -254,6 +262,10 @@ class SettingsRepository(private val context: Context) {
             prefs[Keys.RIDE_MODE]          = s.rideMode
             prefs[Keys.LOGO_URI]           = s.logoUri
             prefs[Keys.RIDE_APPS_JSON]     = gson.toJson(s.rideApps)
+            prefs[Keys.PHONE_GPS_ENABLED]  = s.phoneGpsEnabled
+            prefs[Keys.PHONE_GPS_MODE]     = s.phoneGpsMode.name
+            prefs[Keys.PHONE_GPS_HOST]     = s.phoneGpsHost
+            prefs[Keys.PHONE_GPS_PORT]     = s.phoneGpsPort
     }
 
     suspend fun resetToDefaults() {

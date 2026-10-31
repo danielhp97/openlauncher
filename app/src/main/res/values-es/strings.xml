@@ -401,6 +401,20 @@
     <string name="bike_logo_set">Logo visible en el panel y aquí</string>
     <string name="bike_logo_choose">Elegir imagen</string>
     <string name="bike_logo_remove">Quitar</string>
+    <string name="phone_gps">GPS del iPhone (GPS2IP)</string>
+    <string name="phone_gps_off">Desactivado – la unidad no tiene GPS propio</string>
+    <string name="phone_gps_no_wifi">Esperando Wi-Fi – conéctate al punto de acceso del iPhone</string>
+    <string name="phone_gps_connecting">Conectando a %1$s…</string>
+    <string name="phone_gps_waiting">Conectado a %1$s, esperando posición</string>
+    <string name="phone_gps_listening">Escuchando en el puerto %1$s</string>
+    <string name="phone_gps_receiving">Recibiendo posición de %1$s</string>
+    <string name="phone_gps_no_permission">Ubicación simulada no permitida. Concédela por adb: appops set com.openlauncher.app android:mock_location allow</string>
+    <string name="phone_gps_mode">Conexión</string>
+    <string name="phone_gps_mode_connect">La unidad conecta</string>
+    <string name="phone_gps_mode_listen">El iPhone envía</string>
+    <string name="phone_gps_address">Dirección y puerto</string>
+    <string name="phone_gps_address_sub">Deja la dirección vacía para usar el punto de acceso (iPhone)</string>
+    <string name="phone_gps_auto">Auto</string>
 </resources>
 
 

@@ -403,4 +403,18 @@
     <string name="bike_logo_set">Logo affiché sur le tableau de bord et ici</string>
     <string name="bike_logo_choose">Choisir une image</string>
     <string name="bike_logo_remove">Retirer</string>
+    <string name="phone_gps">GPS de l\'iPhone (GPS2IP)</string>
+    <string name="phone_gps_off">Désactivé – l\'appareil n\'a pas de GPS propre</string>
+    <string name="phone_gps_no_wifi">En attente du Wi-Fi – rejoignez le partage de connexion de l\'iPhone</string>
+    <string name="phone_gps_connecting">Connexion à %1$s…</string>
+    <string name="phone_gps_waiting">Connecté à %1$s, en attente de position</string>
+    <string name="phone_gps_listening">À l\'écoute sur le port %1$s</string>
+    <string name="phone_gps_receiving">Position reçue de %1$s</string>
+    <string name="phone_gps_no_permission">Position fictive non autorisée. Accordez-la via adb : appops set com.openlauncher.app android:mock_location allow</string>
+    <string name="phone_gps_mode">Connexion</string>
+    <string name="phone_gps_mode_connect">L\'appareil se connecte</string>
+    <string name="phone_gps_mode_listen">L\'iPhone envoie</string>
+    <string name="phone_gps_address">Adresse et port</string>
+    <string name="phone_gps_address_sub">Laissez l\'adresse vide pour utiliser le partage de connexion (iPhone)</string>
+    <string name="phone_gps_auto">Auto</string>
 </resources>

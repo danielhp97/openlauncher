@@ -27,6 +27,7 @@ import androidx.core.content.ContextCompat
 import com.openlauncher.app.MainActivity
 import com.openlauncher.app.R
 import com.openlauncher.app.data.OdometerStore
+import com.openlauncher.app.data.SettingsRepository
 import com.openlauncher.app.util.OdometerFilter
 import com.openlauncher.app.util.OdometerFix
 import kotlinx.coroutines.CoroutineScope
@@ -35,6 +36,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
@@ -73,6 +76,8 @@ class OdometerService : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private lateinit var store: OdometerStore
     private val locationManager by lazy { getSystemService(Context.LOCATION_SERVICE) as LocationManager }
+    // Lives here because this service is already the always-on foreground process
+    private lateinit var phoneGps: PhoneGpsReceiver
 
     // Only touched on the main thread (location callbacks use the main looper)
     private var loaded = false
@@ -109,6 +114,13 @@ class OdometerService : Service() {
         ContextCompat.registerReceiver(
             this, shutdownReceiver, IntentFilter(Intent.ACTION_SHUTDOWN), ContextCompat.RECEIVER_EXPORTED
         )
+        phoneGps = PhoneGpsReceiver(this, scope)
+        scope.launch {
+            SettingsRepository(applicationContext).settingsFlow
+                .map { PhoneGpsConfig(it.phoneGpsEnabled, it.phoneGpsMode, it.phoneGpsHost, it.phoneGpsPort) }
+                .distinctUntilChanged()
+                .collect { phoneGps.apply(it) }
+        }
         scope.launch {
             meters = store.load().odometerMeters
             lastSaveMs = SystemClock.elapsedRealtime()
@@ -139,6 +151,7 @@ class OdometerService : Service() {
     override fun onDestroy() {
         runCatching { locationManager.removeUpdates(listener) }
         runCatching { unregisterReceiver(shutdownReceiver) }
+        phoneGps.stop()
         saveBlocking()
         _liveMeters.value = null
         scope.cancel()
