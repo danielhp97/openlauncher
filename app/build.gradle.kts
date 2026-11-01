@@ -22,7 +22,12 @@ android {
             // Default signing config for normal device testing (restores app visibility)
         }
         release {
-            isMinifyEnabled = false
+            // R8 + resource shrinking: Compose debug builds stutter on the unit's SL8541E
+            isMinifyEnabled = true
+            isShrinkResources = true
+            // Sideloaded onto one head unit: signed with the debug key so it updates the
+            // debug install in place and keeps the odometer and settings
+            signingConfig = signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

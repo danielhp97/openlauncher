@@ -1,5 +1,8 @@
 package com.openlauncher.app.ui.screen
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -30,6 +33,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -56,6 +60,7 @@ import com.openlauncher.app.data.AppSettings
 import com.openlauncher.app.data.OdometerState
 import com.openlauncher.app.data.UnitSystem
 import com.openlauncher.app.model.AppInfo
+import com.openlauncher.app.service.PhoneGpsReceiver
 import com.openlauncher.app.ui.components.ConfirmDialog
 import com.openlauncher.app.ui.widget.AddFuelEntryDialog
 import com.openlauncher.app.ui.widget.KM_PER_MILE
@@ -115,9 +120,6 @@ fun RideScreen(
     val distUnit = if (metric) "km" else "mi"
     fun toDist(km: Double) = if (metric) km else km / KM_PER_MILE
 
-    var now by remember { mutableStateOf(Calendar.getInstance()) }
-    LaunchedEffect(Unit) { while (true) { now = Calendar.getInstance(); delay(1000) } }
-
     var showResetTrip by remember { mutableStateOf(false) }
     var showAddFuel   by remember { mutableStateOf(false) }
     val pager = rememberPagerState { 2 }
@@ -150,15 +152,17 @@ fun RideScreen(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = formatTime(now, settings.use24HourFormat),
-                color = text, fontSize = 30.sp, fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Monospace,
+            RideClock(
+                use24h = settings.use24HourFormat, color = text,
                 modifier = Modifier
                     .clip(RoundedCornerShape(6.dp))
                     .combinedClickable(onClick = {}, onLongClick = onOpenLauncher)
                     .padding(horizontal = 6.dp, vertical = 2.dp)
             )
+            if (settings.phoneGpsEnabled) {
+                Spacer(Modifier.width(14.dp))
+                PhoneGpsDot(dim)
+            }
             Text(
                 text = placeName
                     ?: location?.let { "%.4f, %.4f".format(it.latitude, it.longitude) }
@@ -209,7 +213,9 @@ fun RideScreen(
         HorizontalPager(
             state = pager,
             modifier = Modifier.fillMaxWidth().weight(1f),
-            pageSpacing = 16.dp
+            pageSpacing = 16.dp,
+            // Keep both pages composed: rebuilding the tools grid mid-swipe stutters on the unit
+            beyondViewportPageCount = 1
         ) { page ->
         if (page == PAGE_TOOLS) {
             ToolsPage(
@@ -343,6 +349,37 @@ fun RideScreen(
     }
 }
 
+/** Ticks on its own so the rest of the Ride screen doesn't recompose every second. */
+@Composable
+private fun RideClock(use24h: Boolean, color: Color, modifier: Modifier) {
+    var now by remember { mutableStateOf(Calendar.getInstance()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            now = Calendar.getInstance()
+            // Wake on the minute boundary instead of polling every second
+            delay(60_000L - now.get(Calendar.SECOND) * 1000L - now.get(Calendar.MILLISECOND))
+        }
+    }
+    Text(
+        text = formatTime(now, use24h),
+        color = color, fontSize = 30.sp, fontWeight = FontWeight.Bold,
+        fontFamily = FontFamily.Monospace, modifier = modifier
+    )
+}
+
+/** iPhone GPS link: green = positions arriving, amber = connecting, dim = no phone. */
+@Composable
+private fun PhoneGpsDot(dim: Color) {
+    val status by PhoneGpsReceiver.status.collectAsState()
+    val color = when (status.state) {
+        PhoneGpsReceiver.State.RECEIVING -> Color(0xFF3DBE5B)
+        PhoneGpsReceiver.State.CONNECTING,
+        PhoneGpsReceiver.State.WAITING   -> Color(0xFFE0A030)
+        else                             -> dim.copy(alpha = 0.35f)
+    }
+    Box(Modifier.size(10.dp).clip(RoundedCornerShape(50)).background(color))
+}
+
 private fun formatTime(cal: Calendar, use24h: Boolean): String {
     val hour = cal.get(Calendar.HOUR_OF_DAY)
     val minute = cal.get(Calendar.MINUTE)
@@ -373,6 +410,26 @@ private fun TankStripes(modifier: Modifier) {
  * 90s analog speedo: 240° dial, major ticks with figures every 20 (km/h) / 10 (mph),
  * a red needle, and the exact reading in digits at the centre.
  */
+/** Shared layout of the 240° speedo dial, so the cached dial and the needle line up. */
+private class DialGeometry(size: Size, val track: Float) {
+    val radius = min(size.width, size.height * 1.12f) / 2f - track
+    val center = Offset(size.width / 2f, size.height / 2f + radius * 0.12f)
+    val arcSize = Size(radius * 2, radius * 2)
+    val arcTopLeft = Offset(center.x - radius, center.y - radius)
+
+    fun angleFor(fraction: Float) = START + SWEEP * fraction
+
+    fun pointAt(deg: Float, r: Float): Offset {
+        val rad = Math.toRadians(deg.toDouble())
+        return Offset(center.x + r * cos(rad).toFloat(), center.y + r * sin(rad).toFloat())
+    }
+
+    companion object {
+        const val START = 150f
+        const val SWEEP = 240f
+    }
+}
+
 @Composable
 private fun Speedometer(
     speed: Float?,
@@ -385,45 +442,55 @@ private fun Speedometer(
 ) {
     val measurer = rememberTextMeasurer()
     val major = if (maxSpeed > 150) 20 else 10
+    // GPS speed arrives once a second; glide the needle between readings
+    val shown = animateFloatAsState(
+        targetValue = speed ?: 0f,
+        animationSpec = tween(durationMillis = 900, easing = LinearEasing),
+        label = "speedo"
+    )
     Box(modifier, contentAlignment = Alignment.Center) {
-        Canvas(Modifier.fillMaxSize()) {
-            val start = 150f
-            val sweep = 240f
-            val radius = min(size.width, size.height * 1.12f) / 2f - 6.dp.toPx()
-            val center = Offset(size.width / 2f, size.height / 2f + radius * 0.12f)
-            val arcSize = Size(radius * 2, radius * 2)
-            val arcTopLeft = Offset(center.x - radius, center.y - radius)
-            val track = 6.dp.toPx()
-
-            drawArc(dim.copy(alpha = 0.25f), start, sweep, false, arcTopLeft, arcSize, style = Stroke(track, cap = StrokeCap.Butt))
-            val frac = ((speed ?: 0f) / maxSpeed).coerceIn(0f, 1f)
-            if (frac > 0f) drawArc(needle.copy(alpha = 0.35f), start, sweep * frac, false, arcTopLeft, arcSize, style = Stroke(track))
-
-            fun pointAt(deg: Float, r: Float): Offset {
-                val rad = Math.toRadians(deg.toDouble())
-                return Offset(center.x + r * cos(rad).toFloat(), center.y + r * sin(rad).toFloat())
-            }
-
-            val minor = major / 2
-            for (v in 0..maxSpeed step minor) {
-                val deg = start + sweep * v / maxSpeed
-                val isMajor = v % major == 0
-                val outer = radius - track / 2
-                val inner = outer - (if (isMajor) 14.dp else 7.dp).toPx()
-                drawLine(if (isMajor) ink else dim, pointAt(deg, inner), pointAt(deg, outer), strokeWidth = (if (isMajor) 3.dp else 1.5.dp).toPx())
-                if (isMajor) {
-                    val label = measurer.measure(v.toString(), TextStyle(color = ink, fontSize = 13.sp, fontWeight = FontWeight.Bold))
-                    val p = pointAt(deg, inner - 14.dp.toPx())
-                    drawText(label, topLeft = Offset(p.x - label.size.width / 2f, p.y - label.size.height / 2f))
+        // Dial: ticks and labels are measured once per size, not on every needle frame
+        Spacer(
+            Modifier.fillMaxSize().drawWithCache {
+                val g = DialGeometry(size, 6.dp.toPx())
+                val minor = major / 2
+                val ticks = (0..maxSpeed step minor).map { v ->
+                    val deg = g.angleFor(v.toFloat() / maxSpeed)
+                    val isMajor = v % major == 0
+                    val outer = g.radius - g.track / 2
+                    val inner = outer - (if (isMajor) 14.dp else 7.dp).toPx()
+                    val label = if (isMajor) {
+                        val layout = measurer.measure(v.toString(), TextStyle(color = ink, fontSize = 13.sp, fontWeight = FontWeight.Bold))
+                        val p = g.pointAt(deg, inner - 14.dp.toPx())
+                        layout to Offset(p.x - layout.size.width / 2f, p.y - layout.size.height / 2f)
+                    } else null
+                    Triple(g.pointAt(deg, inner) to g.pointAt(deg, outer), isMajor, label)
+                }
+                onDrawBehind {
+                    drawArc(dim.copy(alpha = 0.25f), DialGeometry.START, DialGeometry.SWEEP, false,
+                        g.arcTopLeft, g.arcSize, style = Stroke(g.track, cap = StrokeCap.Butt))
+                    ticks.forEach { (line, isMajor, label) ->
+                        drawLine(if (isMajor) ink else dim, line.first, line.second,
+                            strokeWidth = (if (isMajor) 3.dp else 1.5.dp).toPx())
+                        label?.let { (layout, at) -> drawText(layout, topLeft = at) }
+                    }
                 }
             }
-
+        )
+        // Needle layer: reads the animated value in the draw phase, so animating it
+        // only redraws this canvas instead of recomposing the screen
+        Canvas(Modifier.fillMaxSize()) {
+            val g = DialGeometry(size, 6.dp.toPx())
+            val frac = (shown.value / maxSpeed).coerceIn(0f, 1f)
+            if (frac > 0f) drawArc(needle.copy(alpha = 0.35f), DialGeometry.START, DialGeometry.SWEEP * frac, false,
+                g.arcTopLeft, g.arcSize, style = Stroke(g.track))
             if (speed != null) {
-                val deg = start + sweep * frac
-                drawLine(needle, pointAt(deg + 180f, radius * 0.12f), pointAt(deg, radius * 0.86f), strokeWidth = 5.dp.toPx(), cap = StrokeCap.Round)
+                val deg = g.angleFor(frac)
+                drawLine(needle, g.pointAt(deg + 180f, g.radius * 0.12f), g.pointAt(deg, g.radius * 0.86f),
+                    strokeWidth = 5.dp.toPx(), cap = StrokeCap.Round)
             }
-            drawCircle(ink, radius = 9.dp.toPx(), center = center)
-            drawCircle(needle, radius = 4.dp.toPx(), center = center)
+            drawCircle(ink, radius = 9.dp.toPx(), center = g.center)
+            drawCircle(needle, radius = 4.dp.toPx(), center = g.center)
         }
         // Digital readout sits in the lower half of the dial, under the hub
         Column(
