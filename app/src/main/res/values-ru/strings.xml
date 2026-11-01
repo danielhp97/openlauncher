@@ -415,4 +415,14 @@
     <string name="phone_gps_address">Адрес и порт</string>
     <string name="phone_gps_address_sub">Оставьте адрес пустым для точки доступа (iPhone)</string>
     <string name="phone_gps_auto">Авто</string>
+    <string name="ride_tools">Инструменты</string>
+    <string name="ride_dashboard">Приборы</string>
+    <string name="tool_wifi">Wi-Fi</string>
+    <string name="tool_bluetooth">Bluetooth</string>
+    <string name="tool_display">Экран</string>
+    <string name="tool_android_settings">Настройки Android</string>
+    <string name="tool_developer">Для разработчиков</string>
+    <string name="tool_files">Файлы</string>
+    <string name="tool_all_apps">Все приложения</string>
+    <string name="tool_bike_settings">Настройки приборов</string>
 </resources>

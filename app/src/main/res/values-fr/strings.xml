@@ -417,4 +417,14 @@
     <string name="phone_gps_address">Adresse et port</string>
     <string name="phone_gps_address_sub">Laissez l\'adresse vide pour utiliser le partage de connexion (iPhone)</string>
     <string name="phone_gps_auto">Auto</string>
+    <string name="ride_tools">Outils</string>
+    <string name="ride_dashboard">Tableau de bord</string>
+    <string name="tool_wifi">Wi-Fi</string>
+    <string name="tool_bluetooth">Bluetooth</string>
+    <string name="tool_display">Affichage</string>
+    <string name="tool_android_settings">Paramètres Android</string>
+    <string name="tool_developer">Options pour les développeurs</string>
+    <string name="tool_files">Fichiers</string>
+    <string name="tool_all_apps">Toutes les applis</string>
+    <string name="tool_bike_settings">Réglages du tableau</string>
 </resources>

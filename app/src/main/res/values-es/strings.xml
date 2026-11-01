@@ -415,6 +415,16 @@
     <string name="phone_gps_address">Dirección y puerto</string>
     <string name="phone_gps_address_sub">Deja la dirección vacía para usar el punto de acceso (iPhone)</string>
     <string name="phone_gps_auto">Auto</string>
+    <string name="ride_tools">Herramientas</string>
+    <string name="ride_dashboard">Tablero</string>
+    <string name="tool_wifi">Wi-Fi</string>
+    <string name="tool_bluetooth">Bluetooth</string>
+    <string name="tool_display">Pantalla</string>
+    <string name="tool_android_settings">Ajustes de Android</string>
+    <string name="tool_developer">Opciones de desarrollador</string>
+    <string name="tool_files">Archivos</string>
+    <string name="tool_all_apps">Todas las apps</string>
+    <string name="tool_bike_settings">Ajustes del tablero</string>
 </resources>
 
 

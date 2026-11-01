@@ -414,4 +414,14 @@
     <string name="phone_gps_address">Adres i port</string>
     <string name="phone_gps_address_sub">Zostaw adres pusty, aby użyć hotspotu (iPhone)</string>
     <string name="phone_gps_auto">Auto</string>
+    <string name="ride_tools">Narzędzia</string>
+    <string name="ride_dashboard">Kokpit</string>
+    <string name="tool_wifi">Wi-Fi</string>
+    <string name="tool_bluetooth">Bluetooth</string>
+    <string name="tool_display">Wyświetlacz</string>
+    <string name="tool_android_settings">Ustawienia Androida</string>
+    <string name="tool_developer">Opcje programisty</string>
+    <string name="tool_files">Pliki</string>
+    <string name="tool_all_apps">Wszystkie aplikacje</string>
+    <string name="tool_bike_settings">Ustawienia kokpitu</string>
 </resources>

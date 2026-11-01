@@ -415,5 +415,15 @@
     <string name="phone_gps_address">Adresse und Port</string>
     <string name="phone_gps_address_sub">Adresse leer lassen für den Hotspot (iPhone)</string>
     <string name="phone_gps_auto">Auto</string>
+    <string name="ride_tools">Werkzeuge</string>
+    <string name="ride_dashboard">Cockpit</string>
+    <string name="tool_wifi">WLAN</string>
+    <string name="tool_bluetooth">Bluetooth</string>
+    <string name="tool_display">Display</string>
+    <string name="tool_android_settings">Android-Einstellungen</string>
+    <string name="tool_developer">Entwickleroptionen</string>
+    <string name="tool_files">Dateien</string>
+    <string name="tool_all_apps">Alle Apps</string>
+    <string name="tool_bike_settings">Cockpit-Einstellungen</string>
 </resources>
 

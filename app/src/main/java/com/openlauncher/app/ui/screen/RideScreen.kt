@@ -7,10 +7,22 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Bluetooth
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.TwoWheeler
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,6 +37,8 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -47,6 +61,7 @@ import com.openlauncher.app.ui.widget.AddFuelEntryDialog
 import com.openlauncher.app.ui.widget.KM_PER_MILE
 import com.openlauncher.app.util.LocationData
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.Calendar
 import kotlin.math.cos
 import kotlin.math.min
@@ -58,6 +73,15 @@ private val LiveryBlue = Color(0xFF2346A0)
 // Mechanical counter drums look the same day or night: black drums, white figures
 private val DrumBg     = Color(0xFF111214)
 private val DrumInk    = Color(0xFFF2F0EA)
+
+// Tile apps with a paid and a free edition: fall back to the one that is installed
+private val APP_ALTERNATIVES = mapOf(
+    "net.osmand.plus" to "net.osmand",
+    "net.osmand" to "net.osmand.plus"
+)
+
+private const val PAGE_RIDE  = 0
+private const val PAGE_TOOLS = 1
 
 /**
  * Single-screen home for riding, styled after the 1991 Africa Twin's clocks:
@@ -79,6 +103,7 @@ fun RideScreen(
     onResetTrip: () -> Unit,
     onAddFuelEntry: (odometerKm: Double, volume: Double, cost: Double) -> Unit,
     onOpenLauncher: () -> Unit,
+    onOpenAllApps: () -> Unit,
     isDayMode: Boolean = false,
     modifier: Modifier = Modifier
 ) {
@@ -95,6 +120,8 @@ fun RideScreen(
 
     var showResetTrip by remember { mutableStateOf(false) }
     var showAddFuel   by remember { mutableStateOf(false) }
+    val pager = rememberPagerState { 2 }
+    val scope = rememberCoroutineScope()
 
     val odoKm  = odometer.odometerMeters / 1000.0
     val tripKm = odometer.tripMeters / 1000.0
@@ -148,6 +175,26 @@ fun RideScreen(
                 )
                 Spacer(Modifier.width(10.dp))
             }
+            // Glove-sized switch between the dashboard and the tools page (swiping works too)
+            val onTools = pager.currentPage == PAGE_TOOLS
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(if (onTools) accent.copy(alpha = 0.15f) else tileBg)
+                    .border(1.dp, if (onTools) accent.copy(alpha = 0.6f) else line, RoundedCornerShape(10.dp))
+                    .combinedClickable(onClick = {
+                        scope.launch { pager.animateScrollToPage(if (onTools) PAGE_RIDE else PAGE_TOOLS) }
+                    }),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    if (onTools) Icons.Default.Speed else Icons.Default.Build,
+                    contentDescription = stringResource(if (onTools) R.string.ride_dashboard else R.string.ride_tools),
+                    tint = if (onTools) accent else dim, modifier = Modifier.size(22.dp)
+                )
+            }
+            Spacer(Modifier.width(14.dp))
             TankStripes(Modifier.size(width = 56.dp, height = 22.dp))
             if (settings.vehicleName.isNotBlank()) {
                 Spacer(Modifier.width(10.dp))
@@ -159,6 +206,21 @@ fun RideScreen(
             }
         }
 
+        HorizontalPager(
+            state = pager,
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            pageSpacing = 16.dp
+        ) { page ->
+        if (page == PAGE_TOOLS) {
+            ToolsPage(
+                apps = apps, background = tileBg, border = line, text = text, dim = dim, accent = accent,
+                onOpenBikeSettings = onOpenLauncher,
+                onOpenAllApps = onOpenAllApps,
+                modifier = Modifier.fillMaxSize()
+            )
+            return@HorizontalPager
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         // ── Middle: speedo · trip/odo drums · fuel ───────────────────────────
         Row(
             modifier = Modifier.fillMaxWidth().weight(1f),
@@ -241,15 +303,19 @@ fun RideScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             settings.rideApps.forEachIndexed { slot, pkg ->
+                val app = apps.firstOrNull { it.packageName == pkg }
+                    ?: APP_ALTERNATIVES[pkg]?.let { alt -> apps.firstOrNull { it.packageName == alt } }
                 AppTile(
-                    app = apps.firstOrNull { it.packageName == pkg },
+                    app = app,
                     background = tileBg, border = line, text = text, dim = dim,
                     stripe = if (slot % 2 == 0) LiveryRed else LiveryBlue,
-                    onClick = { onLaunchApp(pkg) },
+                    onClick = { app?.let { onLaunchApp(it.packageName) } },
                     onLongClick = { onPickApp(slot) },
                     modifier = Modifier.weight(1f).fillMaxHeight()
                 )
             }
+        }
+        }
         }
     }
 
@@ -410,6 +476,141 @@ private fun PanelLabel(label: String, hint: String?, color: Color) {
         if (hint != null) {
             Spacer(Modifier.width(8.dp))
             Text(hint, color = color.copy(alpha = color.alpha * 0.8f), fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+    }
+}
+
+private data class Tool(
+    val label: String,
+    val icon: ImageVector,
+    val app: AppInfo? = null,
+    val onClick: () -> Unit
+)
+
+/**
+ * Second page of the Ride screen: the system screens that the stock launcher used
+ * to reach (it is disabled), sized for gloves like the app tiles.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun ToolsPage(
+    apps: List<AppInfo>,
+    background: Color,
+    border: Color,
+    text: Color,
+    dim: Color,
+    accent: Color,
+    onOpenBikeSettings: () -> Unit,
+    onOpenAllApps: () -> Unit,
+    modifier: Modifier
+) {
+    val context = LocalContext.current
+    // First intent that resolves wins; Settings screens differ between vendor builds
+    fun open(vararg intents: android.content.Intent) {
+        for (intent in intents) {
+            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            if (runCatching { context.startActivity(intent) }.isSuccess) return
+        }
+    }
+    fun component(pkg: String, cls: String) = android.content.Intent().setClassName(pkg, cls)
+    fun action(action: String) = android.content.Intent(action)
+    // Fixed labels: the store's own name varies ("Google Play Store", "license checker")
+    fun appTool(pkg: String, label: String, icon: ImageVector): Tool {
+        val app = apps.firstOrNull { it.packageName == pkg }
+        return Tool(label, icon, app) {
+            context.packageManager.getLaunchIntentForPackage(pkg)?.let { open(it) }
+        }
+    }
+
+    val tools = listOf(
+        Tool(stringResource(R.string.tool_wifi), Icons.Default.Wifi) {
+            open(action(android.provider.Settings.ACTION_WIFI_SETTINGS))
+        },
+        Tool(stringResource(R.string.tool_bluetooth), Icons.Default.Bluetooth) {
+            open(action(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS))
+        },
+        Tool(stringResource(R.string.tool_display), Icons.Default.LightMode) {
+            open(action(android.provider.Settings.ACTION_DISPLAY_SETTINGS))
+        },
+        Tool(stringResource(R.string.tool_android_settings), Icons.Default.Settings) {
+            open(action(android.provider.Settings.ACTION_SETTINGS))
+        },
+        // Hidden in this unit's Settings menu, but the screen itself still opens
+        Tool(stringResource(R.string.tool_developer), Icons.Default.Code) {
+            open(
+                action(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS),
+                component("com.android.settings", "com.android.settings.Settings\$DevelopmentSettingsActivity")
+            )
+        },
+        appTool("com.android.vending", "Play Store", Icons.Default.Apps),
+        appTool("de.szalkowski.activitylauncher", "Activity Launcher", Icons.Default.Apps),
+        Tool(stringResource(R.string.tool_files), Icons.Default.Folder) {
+            open(
+                component("com.android.documentsui", "com.android.documentsui.files.FilesActivity"),
+                action(android.content.Intent.ACTION_VIEW).apply {
+                    type = "vnd.android.document/root"
+                }
+            )
+        },
+        Tool(stringResource(R.string.tool_all_apps), Icons.Default.GridView, onClick = onOpenAllApps),
+        Tool(stringResource(R.string.tool_bike_settings), Icons.Default.TwoWheeler, onClick = onOpenBikeSettings)
+    )
+
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        tools.chunked(5).forEachIndexed { row, rowTools ->
+            Row(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                rowTools.forEachIndexed { col, tool ->
+                    ToolTile(
+                        tool = tool, background = background, border = border, text = text, dim = dim,
+                        stripe = if ((row + col) % 2 == 0) LiveryRed else LiveryBlue,
+                        highlight = if (tool.label == stringResource(R.string.tool_bike_settings)) accent else null,
+                        modifier = Modifier.weight(1f).fillMaxHeight()
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun ToolTile(
+    tool: Tool,
+    background: Color,
+    border: Color,
+    text: Color,
+    dim: Color,
+    stripe: Color,
+    highlight: Color?,
+    modifier: Modifier
+) {
+    val icon = remember(tool.app) { tool.app?.icon?.toBitmap(128, 128)?.asImageBitmap() }
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(14.dp))
+            .background(background)
+            .border(1.dp, border, RoundedCornerShape(14.dp))
+            .combinedClickable(onClick = tool.onClick)
+    ) {
+        Box(Modifier.fillMaxWidth().height(4.dp).background(stripe).align(Alignment.TopCenter))
+        Column(
+            modifier = Modifier.fillMaxSize().padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (icon != null) {
+                Image(bitmap = icon, contentDescription = null, modifier = Modifier.size(48.dp))
+            } else {
+                Icon(tool.icon, null, tint = highlight ?: text, modifier = Modifier.size(44.dp))
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(
+                tool.label, color = text, fontSize = 15.sp, fontWeight = FontWeight.Bold,
+                maxLines = 2, textAlign = TextAlign.Center, overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }

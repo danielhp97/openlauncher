@@ -432,7 +432,8 @@ class MainActivity : ComponentActivity() {
                                 onPickApp      = { slot -> vm.startRideAppPicker(slot) },
                                 onResetTrip    = { vm.resetTrip() },
                                 onAddFuelEntry = { odo, vol, cost -> vm.addFuelEntry(odo, vol, cost) },
-                                onOpenLauncher = { vm.navigate(NavDestination.SETTINGS) }
+                                onOpenLauncher = { vm.navigate(NavDestination.SETTINGS) },
+                                onOpenAllApps  = { vm.navigate(NavDestination.APP_LIBRARY) }
                             )
                         } else if (isBottomBar) {
                             Column(modifier = Modifier.fillMaxSize()) {
